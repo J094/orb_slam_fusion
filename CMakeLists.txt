@@ -138,3 +138,12 @@ if(realsense2_FOUND)
   ${realsense2_LIBRARY}
   )
 endif()
+
+# Build executions
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
+# Tools
+add_executable(orbvoc_binary_convertor 
+tools/orbvoc_binary_convertor.cc)
+target_link_libraries(orbvoc_binary_convertor ${PROJECT_NAME})

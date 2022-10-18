@@ -47,6 +47,8 @@ function print_usage() {
   echo "arch_type: specify architecture type, you can use \"x86\" or \"aarch64\""
 }
 
+tar -zxvf vocabulary/ORBvoc.txt.tar.gz
+
 print_usage
 
 if [ "${build_mode}" == "release" ] || [ "${build_mode}" == "debug" ]; then
