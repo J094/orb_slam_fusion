@@ -13,6 +13,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+# # For breakpad analysis
+# set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -g -O2")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -g -O2")
 
 # Check C++11 or C++0x support
 include(CheckCXXCompilerFlag)
@@ -51,6 +54,7 @@ ${PROJECT_SOURCE_DIR}/include/CameraModels
 ${PROJECT_SOURCE_DIR}/3rdparty/Sophus
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
+/home/bynav/gj/code/breakpad/src
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/${BUILD_TYPE})
@@ -127,6 +131,8 @@ ${PROJECT_SOURCE_DIR}/lib/${BUILD_TYPE}/libg2o.so
 -lboost_serialization
 -lcrypto
 -lpthread
+# brakpad for stack analysis
+${PROJECT_SOURCE_DIR}/lib/libbreakpad_client.a
 )
 
 # If RealSense SDK is found the library is added
@@ -142,6 +148,11 @@ endif()
 # Build executions
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
+# Tests
+add_executable(slam_euroc_si
+tests/slam_euroc_si.cc)
+target_link_libraries(slam_euroc_si ${PROJECT_NAME})
 
 # Tools
 add_executable(orbvoc_binary_convertor 

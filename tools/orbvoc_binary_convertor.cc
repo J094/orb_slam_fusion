@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
   cout << "Loading ORBvoc from \".bin\"..." << endl;
   orb_voc->loadFromBinaryFile(filename_save);
   cout << "Done!" << endl;
-  cout << "Converting secceeded!" << endl;
+  cout << "Converting succeeded!" << endl;
   
   return 0;
 }

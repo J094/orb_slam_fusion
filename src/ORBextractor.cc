@@ -56,6 +56,7 @@
 
 #include "ORBextractor.h"
 
+#include <algorithm>
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -522,8 +523,9 @@ void ExtractorNode::DivideNode(ExtractorNode& n1, ExtractorNode& n2,
   if (n4.vKeys.size() == 1) n4.bNoMore = true;
 }
 
-static bool compareNodes(pair<int, ExtractorNode*>& e1,
-                         pair<int, ExtractorNode*>& e2) {
+//NOTE: stable_sort need const arguments
+static bool compareNodes(const pair<int, ExtractorNode*>& e1,
+                         const pair<int, ExtractorNode*>& e2) {
   if (e1.first < e2.first) {
     return true;
   } else if (e1.first > e2.first) {
@@ -541,7 +543,8 @@ vector<cv::KeyPoint> ORBextractor::DistributeOctTree(
     const vector<cv::KeyPoint>& vToDistributeKeys, const int& minX,
     const int& maxX, const int& minY, const int& maxY, const int& N,
     const int& level) {
-  // Compute how many initial nodes
+  // TODO: Check, if there is a bug here?
+  //  Compute how many initial nodes
   const int nIni = round(static_cast<float>(maxX - minX) / (maxY - minY));
 
   const float hX = static_cast<float>(maxX - minX) / nIni;
@@ -664,8 +667,9 @@ vector<cv::KeyPoint> ORBextractor::DistributeOctTree(
             vSizeAndPointerToNode;
         vSizeAndPointerToNode.clear();
 
-        sort(vPrevSizeAndPointerToNode.begin(), vPrevSizeAndPointerToNode.end(),
-             compareNodes);
+        // TODO: Check, if this change is good?
+        stable_sort(vPrevSizeAndPointerToNode.begin(),
+                    vPrevSizeAndPointerToNode.end(), compareNodes);
         for (int j = vPrevSizeAndPointerToNode.size() - 1; j >= 0; j--) {
           ExtractorNode n1, n2, n3, n4;
           vPrevSizeAndPointerToNode[j].second->DivideNode(n1, n2, n3, n4);
@@ -770,7 +774,8 @@ void ORBextractor::ComputeKeyPointsOctTree(
       for (int j = 0; j < nCols; j++) {
         const float iniX = minBorderX + j * wCell;
         float maxX = iniX + wCell + 6;
-        if (iniX >= maxBorderX - 6) continue;
+        // TODO: Check, if this change is good?
+        if (iniX >= maxBorderX - 3) continue;
         if (maxX > maxBorderX) maxX = maxBorderX;
 
         vector<cv::KeyPoint> vKeysCell;

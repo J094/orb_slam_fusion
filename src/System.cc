@@ -33,6 +33,7 @@
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/string.hpp>
 #include <iomanip>
+#include <cmath>
 #include <thread>
 
 #include "Converter.h"
@@ -125,7 +126,7 @@ System::System(const string& strVocFile, const string& strSettingsFile,
          << "Loading ORB Vocabulary. This could take a while..." << endl;
 
     mpVocabulary = new ORBVocabulary();
-    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+    bool bVocLoad = mpVocabulary->loadFromBinaryFile(strVocFile);
     if (!bVocLoad) {
       cerr << "Wrong path to vocabulary. " << endl;
       cerr << "Falied to open at: " << strVocFile << endl;
@@ -145,7 +146,7 @@ System::System(const string& strVocFile, const string& strSettingsFile,
          << "Loading ORB Vocabulary. This could take a while..." << endl;
 
     mpVocabulary = new ORBVocabulary();
-    bool bVocLoad = mpVocabulary->loadFromTextFile(strVocFile);
+    bool bVocLoad = mpVocabulary->loadFromBinaryFile(strVocFile);
     if (!bVocLoad) {
       cerr << "Wrong path to vocabulary. " << endl;
       cerr << "Falied to open at: " << strVocFile << endl;
@@ -212,7 +213,8 @@ System::System(const string& strVocFile, const string& strSettingsFile,
     mpLocalMapper->mThFarPoints = settings_->thFarPoints();
   else
     mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
-  if (mpLocalMapper->mThFarPoints != 0) {
+  //TODO: Check, if this change is good?
+  if (fabs(mpLocalMapper->mThFarPoints) > 1e-6) {
     cout << "Discard points further than " << mpLocalMapper->mThFarPoints
          << " m from current camera" << endl;
     mpLocalMapper->mbFarPoints = true;

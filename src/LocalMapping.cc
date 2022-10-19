@@ -369,11 +369,12 @@ void LocalMapping::MapPointCulling() {
   list<MapPoint*>::iterator lit = mlpRecentAddedMapPoints.begin();
   const unsigned long int nCurrentKFid = mpCurrentKeyFrame->mnId;
 
+  //TODO: Check, if this change is good?
   int nThObs;
-  if (mbMonocular)
-    nThObs = 2;
-  else
+  if (mbInertial)
     nThObs = 3;
+  else
+    nThObs = 2;
   const int cnThObs = nThObs;
 
   int borrar = mlpRecentAddedMapPoints.size();

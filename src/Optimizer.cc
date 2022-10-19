@@ -2217,12 +2217,17 @@ int Optimizer::OptimizeSim3(KeyFrame* pKF1, KeyFrame* pKF2,
 
       nInKF2++;
     } else {
+      //TODO: Check, if this change is good?
       float invz = 1 / P3D2c(2);
       float x = P3D2c(0) * invz;
       float y = P3D2c(1) * invz;
 
-      obs2 << x, y;
-      kpUn2 = cv::KeyPoint(cv::Point2f(x, y), pMP2->mnTrackScaleLevel);
+      float u = pKF2->fx * x + pKF2->cx;
+      float v = pKF2->fy * y + pKF2->cy;
+      obs2 << u, v;
+      kpUn2 = cv::KeyPoint(cv::Point2f(u, v), pMP2->mnTrackScaleLevel);
+      // obs2 << x, y;
+      // kpUn2 = cv::KeyPoint(cv::Point2f(x, y), pMP2->mnTrackScaleLevel);
 
       inKF2 = false;
       nOutKF2++;
@@ -2685,6 +2690,7 @@ void Optimizer::LocalInertialBA(KeyFrame* pKF, bool* pbStopFlag, Map* pMap,
                               optimizer.vertex(pKFi->mnId)));
           e->setMeasurement(obs);
 
+          //TODO: Check, if there is a bug here? Default uncertainty is 1.0
           // Add here uncerteinty
           const float unc2 = pKFi->mpCamera->uncertainty2(obs);
 

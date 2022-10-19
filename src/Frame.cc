@@ -774,7 +774,8 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
     return vIndices;
   }
 
-  const bool bCheckLevels = (minLevel > 0) || (maxLevel >= 0);
+  //TODO: Check, if this change is good?
+  const bool bCheckLevels = (minLevel >= 0) || (maxLevel >= 0);
 
   for (int ix = nMinCellX; ix <= nMaxCellX; ix++) {
     for (int iy = nMinCellY; iy <= nMaxCellY; iy++) {
@@ -786,6 +787,8 @@ vector<size_t> Frame::GetFeaturesInArea(const float &x, const float &y,
         const cv::KeyPoint &kpUn = (Nleft == -1) ? mvKeysUn[vCell[j]]
                                    : (!bRight)   ? mvKeys[vCell[j]]
                                                  : mvKeysRight[vCell[j]];
+        //TODO: Check, if this logic is good?
+        // It seems like, if bCheckLevels is false, all levels are considered
         if (bCheckLevels) {
           if (kpUn.octave < minLevel) continue;
           if (maxLevel >= 0)

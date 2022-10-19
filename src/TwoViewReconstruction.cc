@@ -863,9 +863,13 @@ int TwoViewReconstruction::CheckRT(
 
     vCosParallax.push_back(cosParallax);
     vP3D[vMatches12[i].first] = cv::Point3f(p3dC1(0), p3dC1(1), p3dC1(2));
-    nGood++;
 
-    if (cosParallax < 0.99998) vbGood[vMatches12[i].first] = true;
+
+    //TODO: Check, if this change is good?
+    if (cosParallax < 0.99998) {
+      nGood++;
+      vbGood[vMatches12[i].first] = true;
+    }
   }
 
   if (nGood > 0) {

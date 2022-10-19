@@ -224,7 +224,8 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF, Frame &F,
 
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
-  const float factor = 1.0f / HISTO_LENGTH;
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   // We perform the matching over ORB that belong to the same vocabulary node
   // (at a certain level)
@@ -602,7 +603,8 @@ int ORBmatcher::SearchForInitialization(Frame &F1, Frame &F2,
 
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
-  const float factor = 1.0f / HISTO_LENGTH;
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   vector<int> vMatchedDistance(F2.mvKeysUn.size(), INT_MAX);
   vector<int> vnMatches21(F2.mvKeysUn.size(), -1);
@@ -711,7 +713,8 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF1, KeyFrame *pKF2,
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
 
-  const float factor = 1.0f / HISTO_LENGTH;
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   int nmatches = 0;
 
@@ -861,7 +864,8 @@ int ORBmatcher::SearchForTriangulation(
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
 
-  const float factor = 1.0f / HISTO_LENGTH;
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   DBoW2::FeatureVector::const_iterator f1it = vFeatVec1.begin();
   DBoW2::FeatureVector::const_iterator f2it = vFeatVec2.begin();
@@ -981,7 +985,9 @@ int ORBmatcher::SearchForTriangulation(
               : (bestIdx2 < pKF2->NLeft)
                   ? pKF2->mvKeys[bestIdx2]
                   : pKF2->mvKeysRight[bestIdx2 - pKF2->NLeft];
+          //TODO: Check, if this change is good?
           vMatches12[idx1] = bestIdx2;
+          vbMatched2[bestIdx2]=true;
           nmatches++;
 
           if (mbCheckOrientation) {
@@ -1014,6 +1020,8 @@ int ORBmatcher::SearchForTriangulation(
     for (int i = 0; i < HISTO_LENGTH; i++) {
       if (i == ind1 || i == ind2 || i == ind3) continue;
       for (size_t j = 0, jend = rotHist[i].size(); j < jend; j++) {
+        //TODO: Check, if this change is good?
+        vbMatched2[vMatches12[rotHist[i][j]]] = false;
         vMatches12[rotHist[i][j]] = -1;
         nmatches--;
       }
@@ -1514,7 +1522,9 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
   // Rotation Histogram (to check rotation consistency)
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
-  const float factor = 1.0f / HISTO_LENGTH;
+
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   const Sophus::SE3f Tcw = CurrentFrame.GetPose();
   const Eigen::Vector3f twc = Tcw.inverse().translation();
@@ -1728,7 +1738,9 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF,
   // Rotation Histogram (to check rotation consistency)
   vector<int> rotHist[HISTO_LENGTH];
   for (int i = 0; i < HISTO_LENGTH; i++) rotHist[i].reserve(500);
-  const float factor = 1.0f / HISTO_LENGTH;
+
+  //TODO: Check, if this change is good?
+  const float factor = HISTO_LENGTH/360.0f;
 
   const vector<MapPoint *> vpMPs = pKF->GetMapPointMatches();
 

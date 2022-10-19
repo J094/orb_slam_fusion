@@ -2699,9 +2699,10 @@ bool Tracking::TrackWithMotionModel() {
 
   if (mpAtlas->isImuInitialized() &&
       (mCurrentFrame.mnId > mnLastRelocFrameId + mnFramesToResetIMU)) {
+    //TODO: Check, if this change is good?
     // Predict state with IMU if it is initialized and it doesnt need reset
     PredictStateIMU();
-    return true;
+    if (!mpLocalMapper->IsInitializing() || !mpLocalMapper->isStopped()) return true;
   } else {
     mCurrentFrame.SetPose(mVelocity * mLastFrame.GetPose());
   }

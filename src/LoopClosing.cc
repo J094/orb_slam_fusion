@@ -415,7 +415,8 @@ bool LoopClosing::NewDetectCommonRegions() {
       mbLoopDetected = mnLoopNumCoincidences >= 3;
       mnLoopNumNotFound = 0;
 
-      if (!mbLoopDetected) {
+      //TODO: Check, if this change is good?
+      if (mbLoopDetected) {
         cout << "PR: Loop detected with Reffine Sim3" << endl;
       }
     } else {
@@ -593,7 +594,8 @@ bool LoopClosing::DetectAndReffineSim3FromLastKF(
     // + " matches after of the optimization ", Verbose::VERBOSITY_DEBUG);
 
     if (numOptMatches > nProjOptMatches) {
-      g2o::Sim3 gScw_estimation(gScw.rotation(), gScw.translation(), 1.0);
+      //TODO: Check, if this change is good?
+      g2o::Sim3 gScw_estimation((gScm * gSwm.inverse()).rotation(), (gScm * gSwm.inverse()).translation(), 1.0);
 
       vector<MapPoint*> vpMatchedMP;
       vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(),
@@ -1981,6 +1983,9 @@ void LoopClosing::MergeLocal2() {
       pCurrentMap->AddMapPoint(pMPi);
       pMergeMap->EraseMapPoint(pMPi);
     }
+
+    //TODO: Check, if this change is good?
+    mpAtlas->SetMapBad(pMergeMap);
 
     // Save non corrected poses (already merged maps)
     vector<KeyFrame*> vpKFs = pCurrentMap->GetAllKeyFrames();
