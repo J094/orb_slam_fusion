@@ -2443,7 +2443,8 @@ void Tracking::CreateInitialMapMonocular() {
     invMedianDepth = 1.0f / medianDepth;
 
   if (medianDepth < 0 ||
-      pKFcur->TrackedMapPoints(1) < 50)  // TODO Check, originally 100 tracks
+  // TODO Check, originally 100 tracks
+      pKFcur->TrackedMapPoints(1) < 50)
   {
     Verbose::PrintMess("Wrong initialization, reseting...",
                        Verbose::VERBOSITY_QUIET);
@@ -3062,7 +3063,8 @@ void Tracking::CreateNewKeyFrame() {
   }
 
   if (mSensor != System::MONOCULAR &&
-      mSensor != System::IMU_MONOCULAR)  // TODO check if incluide imu_stereo
+  // TODO check if incluide imu_stereo
+      mSensor != System::IMU_MONOCULAR)
   {
     mCurrentFrame.UpdatePoseMatrices();
     // cout << "create new MPs" << endl;

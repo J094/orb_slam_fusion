@@ -372,7 +372,7 @@ void LocalMapping::MapPointCulling() {
   //TODO: Check, if this change is good?
   int nThObs;
   if (mbInertial)
-    nThObs = 3;
+    nThObs = 2;
   else
     nThObs = 2;
   const int cnThObs = nThObs;
