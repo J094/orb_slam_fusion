@@ -11,11 +11,11 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-# # For breakpad analysis
-# set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -g -O2")
-# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -g -O2")
+# set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+# For breakpad analysis
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native -g -O2")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -g -O2")
 
 # Check C++11 or C++0x support
 include(CheckCXXCompilerFlag)
@@ -60,64 +60,64 @@ ${Pangolin_INCLUDE_DIRS}
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/${BUILD_TYPE})
 
 add_library(${PROJECT_NAME} SHARED
-src/System.cc
-src/Tracking.cc
-src/LocalMapping.cc
-src/LoopClosing.cc
-src/ORBextractor.cc
-src/ORBmatcher.cc
-src/FrameDrawer.cc
-src/Converter.cc
-src/MapPoint.cc
-src/KeyFrame.cc
-src/Atlas.cc
-src/Map.cc
-src/MapDrawer.cc
-src/Optimizer.cc
-src/Frame.cc
-src/KeyFrameDatabase.cc
-src/Sim3Solver.cc
-src/Viewer.cc
-src/ImuTypes.cc
-src/G2oTypes.cc
-src/CameraModels/Pinhole.cpp
-src/CameraModels/KannalaBrandt8.cpp
-src/OptimizableTypes.cpp
-src/MLPnPsolver.cpp
-src/GeometricTools.cc
-src/TwoViewReconstruction.cc
-src/Config.cc
-src/Settings.cc
-include/System.h
-include/Tracking.h
-include/LocalMapping.h
-include/LoopClosing.h
-include/ORBextractor.h
-include/ORBmatcher.h
-include/FrameDrawer.h
-include/Converter.h
-include/MapPoint.h
-include/KeyFrame.h
-include/Atlas.h
-include/Map.h
-include/MapDrawer.h
-include/Optimizer.h
-include/Frame.h
-include/KeyFrameDatabase.h
-include/Sim3Solver.h
-include/Viewer.h
-include/ImuTypes.h
-include/G2oTypes.h
-include/CameraModels/GeometricCamera.h
-include/CameraModels/Pinhole.h
-include/CameraModels/KannalaBrandt8.h
-include/OptimizableTypes.h
-include/MLPnPsolver.h
-include/GeometricTools.h
-include/TwoViewReconstruction.h
-include/SerializationUtils.h
-include/Config.h
-include/Settings.h
+src/system.cc
+src/tracking.cc
+src/localmapping.cc
+src/loopclosing.cc
+src/viewer.cc
+src/utils/converter.cc
+src/utils/map_drawer.cc
+src/utils/frame_drawer.cc
+src/utils/geometric_tools.cc
+src/map/atlas.cc
+src/map/map.cc
+src/map/frame.cc
+src/map/keyframe.cc
+src/map/keyframe_database.cc
+src/map/mappoint.cc
+src/imu/imu_types.cc
+src/cam/camera_models/pinhole_model.cc
+src/cam/camera_models/kannalabrandt8_model.cc
+src/cam/orb_feature/orb_extractor.cc
+src/cam/orb_feature/orb_matcher.cc
+src/cam/two_view_reconstruction.cc
+src/config/config.cc
+src/config/settings.cc
+src/solver/mlpnp_solver.cc
+src/solver/sim3_solver.cc
+src/solver/g2o_solver/g2o_types.cc
+src/solver/g2o_solver/optimizable_types.cc
+src/solver/g2o_solver/optimizer.cc
+include/system.h
+include/tracking.h
+include/localmapping.h
+include/loopclosing.h
+include/viewer.h
+include/utils/converter.h
+include/utils/map_drawer.h
+include/utils/frame_drawer.h
+include/utils/geometric_tools.h
+include/utils/serialization_utils.h
+include/map/atlas.h
+include/map/map.h
+include/map/frame.h
+include/map/keyframe.h
+include/map/keyframe_database.h
+include/map/mappoint.h
+include/imu/imu_types.h
+include/cam/camera_models/geometric_camera.h
+include/cam/camera_models/pinhole_model.h
+include/cam/camera_models/kannalabrandt8_model.h
+include/cam/orb_feature/orb_extractor.h
+include/cam/orb_feature/orb_matcher.h
+include/cam/two_view_reconstruction.h
+include/config/config.h
+include/config/settings.h
+include/solver/mlpnp_solver.h
+include/solver/sim3_solver.h
+include/solver/g2o_solver/g2o_types.h
+include/solver/g2o_solver/optimizable_types.h
+include/solver/g2o_solver/optimizer.h
 )
 
 add_subdirectory(3rdparty/g2o)
