@@ -19,7 +19,7 @@
  * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <System.h>
+#include <system.h>
 
 #include <algorithm>
 #include <chrono>
@@ -30,18 +30,18 @@
 #include <opencv2/core/core.hpp>
 #include <sstream>
 
-#include "ImuTypes.h"
-#include "Optimizer.h"
+#include "imu/imu_types.h"
+#include "solver/g2o_solver/optimizer.h"
 
 using namespace std;
 
 // Breakpad stack analyse
-// #include "client/linux/handler/exception_handler.h"
-// static bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor,
-//                          void *context, bool succeed) {
-//   cout << "Dump path: " << descriptor.path() << endl;
-//   return succeed;
-// }
+#include "client/linux/handler/exception_handler.h"
+static bool DumpCallback(const google_breakpad::MinidumpDescriptor &descriptor,
+                         void *context, bool succeed) {
+  cout << "Dump path: " << descriptor.path() << endl;
+  return succeed;
+}
 
 void LoadImages(const string &strPathLeft, const string &strPathRight,
                 const string &strPathTimes, vector<string> &vstrImageLeft,
@@ -52,9 +52,9 @@ void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps,
 
 int main(int argc, char **argv) {
   // Breakpad stack analyse
-  // google_breakpad::MinidumpDescriptor descriptor("./");
-  // google_breakpad::ExceptionHandler eh(descriptor, NULL, DumpCallback, NULL,
-  //                                      true, -1);
+  google_breakpad::MinidumpDescriptor descriptor("./");
+  google_breakpad::ExceptionHandler eh(descriptor, NULL, DumpCallback, NULL,
+                                       true, -1);
 
   if (argc < 5) {
     cerr << endl
@@ -128,11 +128,11 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM3::System SLAM(argv[1], argv[2], ORB_SLAM3::System::IMU_STEREO,
+  ORB_SLAM_FUSION::System SLAM(argv[1], argv[2], ORB_SLAM_FUSION::System::IMU_STEREO,
                          true);
 
   cv::Mat imLeft, imRight;
-  vector<ORB_SLAM3::IMU::Point> vImuMeas;
+  vector<ORB_SLAM_FUSION::IMU::Point> vImuMeas;
   double t_rect = 0.f;
   double t_resize = 0.f;
   double t_track = 0.f;
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
     if (ni > 0)
       // while(vTimestampsImu[first_imu]<=vTimestampsCam[ni])
       while (vTimestampsImu[first_imu] <= vTimestampsCam[ni]) {
-        vImuMeas.push_back(ORB_SLAM3::IMU::Point(
+        vImuMeas.push_back(ORB_SLAM_FUSION::IMU::Point(
             vAcc[first_imu].x, vAcc[first_imu].y, vAcc[first_imu].z,
             vGyro[first_imu].x, vGyro[first_imu].y, vGyro[first_imu].z,
             vTimestampsImu[first_imu]));

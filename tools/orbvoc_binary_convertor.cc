@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
 
-#include "ORBVocabulary.h"
+#include "cam/orb_feature/orb_vocabulary.h"
 
 using namespace std;
 
-using namespace ORB_SLAM3;
+using namespace ORB_SLAM_FUSION;
 
 int main(int argc, char** argv) {
   string filename_read = string(argv[1]);
