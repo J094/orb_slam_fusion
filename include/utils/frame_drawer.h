@@ -39,7 +39,7 @@ class Viewer;
 class FrameDrawer {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  FrameDrawer(Atlas *pAtlas);
+  FrameDrawer(Atlas *atlas);
 
   // Update info from the last processed frame.
   void Update(Tracking *pTracker);
@@ -54,7 +54,7 @@ class FrameDrawer {
   void DrawTextInfo(cv::Mat &im, int nState, cv::Mat &imText);
 
   // Info of the frame to be drawn
-  cv::Mat mIm, mImRight;
+  cv::Mat mIm, img_right_;
   int N;
   vector<cv::KeyPoint> mvCurrentKeys, mvCurrentKeysRight;
   vector<bool> mvbMap, mvbVO;
@@ -62,16 +62,16 @@ class FrameDrawer {
   int mnTracked, mnTrackedVO;
   vector<cv::KeyPoint> mvIniKeys;
   vector<int> mvIniMatches;
-  int mState;
+  int state_;
   std::vector<float> mvCurrentDepth;
-  float mThDepth;
+  float th_depth_;
 
-  Atlas *mpAtlas;
+  Atlas *atlas_;
 
   std::mutex mMutex;
   vector<pair<cv::Point2f, cv::Point2f> > mvTracks;
 
-  Frame mCurrentFrame;
+  Frame curr_frame_;
   vector<MapPoint *> mvpLocalMap;
   vector<cv::KeyPoint> mvMatchedKeys;
   vector<MapPoint *> mvpMatchedMPs;

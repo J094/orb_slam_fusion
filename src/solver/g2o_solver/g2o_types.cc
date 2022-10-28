@@ -32,7 +32,7 @@ ImuCamPose::ImuCamPose(KeyFrame* pKF) : its(0) {
 
   // Load camera poses
   int num_cams;
-  if (pKF->mpCamera2)
+  if (pKF->cam2_)
     num_cams = 2;
   else
     num_cams = 1;
@@ -52,8 +52,8 @@ ImuCamPose::ImuCamPose(KeyFrame* pKF) : its(0) {
   Rcb[0] = pKF->mImuCalib.mTcb.rotationMatrix().cast<double>();
   Rbc[0] = Rcb[0].transpose();
   tbc[0] = pKF->mImuCalib.mTbc.translation().cast<double>();
-  pCamera[0] = pKF->mpCamera;
-  bf = pKF->mbf;
+  pCamera[0] = pKF->cam_;
+  bf = pKF->bf_;
 
   if (num_cams > 1) {
     Eigen::Matrix4d Trl = pKF->GetRelativePoseTrl().matrix().cast<double>();
@@ -63,7 +63,7 @@ ImuCamPose::ImuCamPose(KeyFrame* pKF) : its(0) {
     Rcb[1] = Trl.block<3, 3>(0, 0) * Rcb[0];
     Rbc[1] = Rcb[1].transpose();
     tbc[1] = -Rbc[1] * tcb[1];
-    pCamera[1] = pKF->mpCamera2;
+    pCamera[1] = pKF->cam2_;
   }
 
   // For posegraph 4DoF
@@ -78,7 +78,7 @@ ImuCamPose::ImuCamPose(Frame* pF) : its(0) {
 
   // Load camera poses
   int num_cams;
-  if (pF->mpCamera2)
+  if (pF->cam2_)
     num_cams = 2;
   else
     num_cams = 1;
@@ -98,8 +98,8 @@ ImuCamPose::ImuCamPose(Frame* pF) : its(0) {
   Rcb[0] = pF->mImuCalib.mTcb.rotationMatrix().cast<double>();
   Rbc[0] = Rcb[0].transpose();
   tbc[0] = pF->mImuCalib.mTbc.translation().cast<double>();
-  pCamera[0] = pF->mpCamera;
-  bf = pF->mbf;
+  pCamera[0] = pF->cam_;
+  bf = pF->bf_;
 
   if (num_cams > 1) {
     Eigen::Matrix4d Trl = pF->GetRelativePoseTrl().matrix().cast<double>();
@@ -109,7 +109,7 @@ ImuCamPose::ImuCamPose(Frame* pF) : its(0) {
     Rcb[1] = Trl.block<3, 3>(0, 0) * Rcb[0];
     Rbc[1] = Rcb[1].transpose();
     tbc[1] = -Rbc[1] * tcb[1];
-    pCamera[1] = pF->mpCamera2;
+    pCamera[1] = pF->cam2_;
   }
 
   // For posegraph 4DoF
@@ -137,8 +137,8 @@ ImuCamPose::ImuCamPose(Eigen::Matrix3d& _Rwc, Eigen::Vector3d& _twc,
   Rwb = _Rwc * Rcb[0];
   Rcw[0] = _Rwc.transpose();
   tcw[0] = -Rcw[0] * _twc;
-  pCamera[0] = pKF->mpCamera;
-  bf = pKF->mbf;
+  pCamera[0] = pKF->cam_;
+  bf = pKF->bf_;
 
   // For posegraph 4DoF
   Rwb0 = Rwb;
@@ -256,7 +256,7 @@ InvDepthPoint::InvDepthPoint(double _rho, double _u, double _v,
       fy(pHostKF->fy),
       cx(pHostKF->cx),
       cy(pHostKF->cy),
-      bf(pHostKF->mbf) {}
+      bf(pHostKF->bf_) {}
 
 void InvDepthPoint::Update(const double* pu) { rho += *pu; }
 

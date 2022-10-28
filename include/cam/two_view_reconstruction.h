@@ -102,7 +102,7 @@ class TwoViewReconstruction {
   std::vector<bool> mvbMatched1;
 
   // Calibration
-  Eigen::Matrix3f mK;
+  Eigen::Matrix3f cv_K_;
 
   // Standard Deviation and Variance
   float mSigma, mSigma2;

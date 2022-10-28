@@ -38,8 +38,8 @@ Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2,
     : mnIterations(0),
       mnBestInliers(0),
       mbFixScale(bFixScale),
-      pCamera1(pKF1->mpCamera),
-      pCamera2(pKF2->mpCamera) {
+      pCamera1(pKF1->cam_),
+      pCamera2(pKF2->cam_) {
   bool bDifferentKFs = false;
   if (vpKeyFrameMatchedMP.empty()) {
     bDifferentKFs = true;

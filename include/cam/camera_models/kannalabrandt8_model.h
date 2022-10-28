@@ -41,7 +41,7 @@ class KannalaBrandt8 : public GeometricCamera {
   KannalaBrandt8() : precision(1e-6) {
     mvParameters.resize(8);
     mnId = nNextId++;
-    mnType = CAM_FISHEYE;
+    mnType = kCamFisheye;
   }
   KannalaBrandt8(const std::vector<float> _vParameters)
       : GeometricCamera(_vParameters),
@@ -50,7 +50,7 @@ class KannalaBrandt8 : public GeometricCamera {
         tvr(nullptr) {
     assert(mvParameters.size() == 8);
     mnId = nNextId++;
-    mnType = CAM_FISHEYE;
+    mnType = kCamFisheye;
   }
 
   KannalaBrandt8(const std::vector<float> _vParameters, const float _precision)
@@ -59,7 +59,7 @@ class KannalaBrandt8 : public GeometricCamera {
         mvLappingArea(2, 0) {
     assert(mvParameters.size() == 8);
     mnId = nNextId++;
-    mnType = CAM_FISHEYE;
+    mnType = kCamFisheye;
   }
   KannalaBrandt8(KannalaBrandt8* pKannala)
       : GeometricCamera(pKannala->mvParameters),
@@ -68,7 +68,7 @@ class KannalaBrandt8 : public GeometricCamera {
         tvr(nullptr) {
     assert(mvParameters.size() == 8);
     mnId = nNextId++;
-    mnType = CAM_FISHEYE;
+    mnType = kCamFisheye;
   }
 
   cv::Point2f project(const cv::Point3f& p3D);
@@ -116,7 +116,7 @@ class KannalaBrandt8 : public GeometricCamera {
 
   float GetPrecision() { return precision; }
 
-  bool IsEqual(GeometricCamera* pCam);
+  bool IsEqual(GeometricCamera* cam);
 
  private:
   const float precision;

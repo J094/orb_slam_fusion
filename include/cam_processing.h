@@ -1,83 +1,46 @@
-/**
- * This file is part of ORB-SLAM3
- *
- * Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez
- * Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
- * Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós,
- * University of Zaragoza.
- *
- * ORB-SLAM3 is free software: you can redistribute it and/or modify it under
- * the terms of the GNU General Public License as published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) any later
- * version.
- *
- * ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
- */
+#ifndef CAM_PROCESSING_H
+#define CAM_PROCESSING_H
 
-#ifndef TRACKING_H
-#define TRACKING_H
+#include <opencv2/opencv.hpp>
+#include <string>
 
-#include <mutex>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <unordered_set>
-
-#include "map/atlas.h"
-#include "map/frame.h"
-#include "utils/frame_drawer.h"
-#include "cam/camera_models/geometric_camera.h"
+#include "3rdparty/Sophus/sophus/se3.hpp"
 #include "imu/imu_types.h"
-#include "map/keyframe_database.h"
-#include "localmapping.h"
-#include "loopclosing.h"
-#include "utils/map_drawer.h"
-#include "cam/orb_feature/orb_vocabulary.h"
-#include "cam/orb_feature/orb_extractor.h"
-#include "config/settings.h"
-#include "system.h"
-#include "viewer.h"
+#include "map/frame.h"
 
 namespace ORB_SLAM_FUSION {
 
-class Viewer;
-class FrameDrawer;
 class Atlas;
+class Map;
 class LocalMapping;
 class LoopClosing;
 class System;
+class KeyFrame;
+class KeyFrameDatabase;
+class ORBVocabulary;
 class Settings;
+class Viewer;
+class FrameDrawer;
+class MapDrawer;
+class ImuProcessing;
 
-class Tracking {
+class CamProcessing {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Tracking(System* sys, ORBVocabulary* voc, FrameDrawer* frame_drawer,
-           MapDrawer* map_drawer, Atlas* atlas, KeyFrameDatabase* kf_database,
-           const string& strSettingPath, const int sensor, Settings* settings,
-           const string& _nameSeq = std::string());
+  CamProcessing(System* sys, ORBVocabulary* voc, FrameDrawer* frame_drawer,
+                MapDrawer* map_drawer, Atlas* atlas,
+                KeyFrameDatabase* kf_database, const int sensor,
+                Settings* settings);
 
-  ~Tracking();
+  ~CamProcessing();
 
-  // Parse the config file
-  bool ParseCamParamFile(cv::FileStorage& fSettings);
-  bool ParseORBParamFile(cv::FileStorage& fSettings);
-  bool ParseIMUParamFile(cv::FileStorage& fSettings);
+  void CamParamLoader(Settings* settings);
 
   // Preprocess the input and call Track(). Extract features and performs stereo
-  // matching.
+  // matching
   Sophus::SE3f GrabImageStereo(const cv::Mat& img_rect_left,
                                const cv::Mat& img_rect_right,
-                               const double& timestamp, string filename);
-  Sophus::SE3f GrabImageRGBD(const cv::Mat& imRGB, const cv::Mat& imD,
-                             const double& timestamp, string filename);
-  Sophus::SE3f GrabImageMonocular(const cv::Mat& im, const double& timestamp,
-                                  string filename);
-
-  void GrabImuData(const IMU::Point& imuMeasurement);
+                               const double& timestamp, std::string filename);
 
   void SetLocalMapper(LocalMapping* pLocalMapper);
   void SetLoopClosing(LoopClosing* pLoopClosing);
@@ -88,7 +51,7 @@ class Tracking {
   // Load new settings
   // The focal lenght should be similar or scale prediction will fail when
   // projecting points
-  void ChangeCalibration(const string& strSettingPath);
+  void ChangeCalibration(const std::string& strSettingPath);
 
   // Use this function if you have deactivated local mapping and you only want
   // to localize the camera.
@@ -101,18 +64,14 @@ class Tracking {
   void CreateMapInAtlas();
   // std::mutex mMutexTracks;
 
-  //--
-  void NewDataset();
-  int GetNumberDataset();
   int GetMatchesInliers();
 
-  // DEBUG
-  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf,
-                         string strFolder = "");
-  void SaveSubTrajectory(string strNameFile_frames, string strNameFile_kf,
-                         Map* pMap);
-
   float GetImageScale();
+
+  void Reset(bool bLocMap = false);
+  void ResetActiveMap(bool bLocMap = false);
+
+  vector<MapPoint*> GetLocalMapMPS();
 
  public:
   // Tracking states
@@ -345,8 +304,14 @@ class Tracking {
 
  public:
   cv::Mat img_right_;
-};
 
+ public:
+  ImuProcessing* imu_processing_;
+
+  IMU::Preintegrated* imu_preint_f_;
+  IMU::Preintegrated* imu_preint_kf_;
+  std::mutex mutex_preint_f_;
+};
 }  // namespace ORB_SLAM_FUSION
 
-#endif  // TRACKING_H
+#endif

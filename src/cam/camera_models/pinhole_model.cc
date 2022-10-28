@@ -154,10 +154,10 @@ std::istream &operator>>(std::istream &is, Pinhole &ph) {
   return is;
 }
 
-bool Pinhole::IsEqual(GeometricCamera *pCam) {
-  if (pCam->GetType() != GeometricCamera::CAM_PINHOLE) return false;
+bool Pinhole::IsEqual(GeometricCamera *cam) {
+  if (cam->GetType() != GeometricCamera::kCamPinhole) return false;
 
-  Pinhole *pPinholeCam = (Pinhole *)pCam;
+  Pinhole *pPinholeCam = (Pinhole *)cam;
 
   if (size() != pPinholeCam->size()) return false;
 

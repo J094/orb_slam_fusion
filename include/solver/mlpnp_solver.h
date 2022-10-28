@@ -238,7 +238,7 @@ class MLPnPsolver {
   // th*th*sigma(level)*sigma(level)
   vector<float> mvMaxError;
 
-  GeometricCamera* mpCamera;
+  GeometricCamera* cam_;
 };
 
 }  // namespace ORB_SLAM_FUSION

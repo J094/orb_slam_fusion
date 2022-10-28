@@ -54,7 +54,7 @@ class KeyFrame {
   void serialize(Archive& ar, const unsigned int version) {
     ar& mnId;
     ar& const_cast<long unsigned int&>(mnFrameId);
-    ar& const_cast<double&>(mTimeStamp);
+    ar& const_cast<double&>(timestamp_);
     // Grid
     ar& const_cast<int&>(mnGridCols);
     ar& const_cast<int&>(mnGridRows);
@@ -110,10 +110,10 @@ class KeyFrame {
     ar& const_cast<float&>(invfy);
     ar& const_cast<float&>(cx);
     ar& const_cast<float&>(cy);
-    ar& const_cast<float&>(mbf);
+    ar& const_cast<float&>(bf_);
     ar& const_cast<float&>(mb);
-    ar& const_cast<float&>(mThDepth);
-    serializeMatrix(ar, mDistCoef, version);
+    ar& const_cast<float&>(th_depth_);
+    serializeMatrix(ar, dist_coef_, version);
     // Number of Keypoints
     ar& const_cast<int&>(N);
     // KeyPoints
@@ -139,7 +139,7 @@ class KeyFrame {
     ar& const_cast<int&>(mnMinY);
     ar& const_cast<int&>(mnMaxX);
     ar& const_cast<int&>(mnMaxY);
-    ar& boost::serialization::make_array(mK_.data(), mK_.size());
+    ar& boost::serialization::make_array(eig_K_.data(), eig_K_.size());
     // Pose
     serializeSophusSE3<Archive>(ar, mTcw, version);
     // MapPointsId associated to keypoints
@@ -172,7 +172,7 @@ class KeyFrame {
     ar& mvRightToLeftMatch;
     ar& const_cast<int&>(NLeft);
     ar& const_cast<int&>(NRight);
-    serializeSophusSE3<Archive>(ar, mTlr, version);
+    serializeSophusSE3<Archive>(ar, so_Tlr_, version);
     serializeVectorKeyPoints<Archive>(ar, mvKeysRight, version);
     ar& mGridRight;
 
@@ -191,7 +191,7 @@ class KeyFrame {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   KeyFrame();
-  KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* pKFDB);
+  KeyFrame(Frame& F, Map* pMap, KeyFrameDatabase* kf_database);
 
   // Pose functions
   void SetPose(const Sophus::SE3f& Tcw);
@@ -300,7 +300,7 @@ class KeyFrame {
                 map<unsigned int, GeometricCamera*>& mpCamId);
 
   void SetORBVocabulary(ORBVocabulary* pORBVoc);
-  void SetKeyFrameDatabase(KeyFrameDatabase* pKFDB);
+  void SetKeyFrameDatabase(KeyFrameDatabase* kf_database);
 
   bool bImu;
 
@@ -311,7 +311,7 @@ class KeyFrame {
   long unsigned int mnId;
   const long unsigned int mnFrameId;
 
-  const double mTimeStamp;
+  const double timestamp_;
 
   // Grid (to speed up feature matching)
   const int mnGridCols;
@@ -369,8 +369,8 @@ class KeyFrame {
   float mfScale;
 
   // Calibration parameters
-  const float fx, fy, cx, cy, invfx, invfy, mbf, mb, mThDepth;
-  cv::Mat mDistCoef;
+  const float fx, fy, cx, cy, invfx, invfy, bf_, mb, th_depth_;
+  cv::Mat dist_coef_;
 
   // Number of KeyPoints
   const int N;
@@ -412,9 +412,9 @@ class KeyFrame {
 
   unsigned int mnOriginMapId;
 
-  string mNameFile;
+  string file_name_;
 
-  int mnDataset;
+  int num_dataset_;
 
   std::vector<KeyFrame*> mvpLoopCandKFs;
   std::vector<KeyFrame*> mvpMergeCandKFs;
@@ -438,7 +438,7 @@ class KeyFrame {
   bool mbHasVelocity;
 
   // Transformation matrix between cameras in stereo fisheye
-  Sophus::SE3<float> mTlr;
+  Sophus::SE3<float> so_Tlr_;
   Sophus::SE3<float> mTrl;
 
   // Imu bias
@@ -492,7 +492,7 @@ class KeyFrame {
   unsigned int mnBackupIdCamera, mnBackupIdCamera2;
 
   // Calibration
-  Eigen::Matrix3f mK_;
+  Eigen::Matrix3f eig_K_;
 
   // Mutex
   std::mutex mMutexPose;  // for pose, velocity and biases
@@ -501,7 +501,7 @@ class KeyFrame {
   std::mutex mMutexMap;
 
  public:
-  GeometricCamera *mpCamera, *mpCamera2;
+  GeometricCamera *cam_, *cam2_;
 
   // Indexes of stereo observations correspondences
   std::vector<int> mvLeftToRightMatch, mvRightToLeftMatch;

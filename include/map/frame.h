@@ -182,7 +182,7 @@ class Frame {
   // extracting the translation vector: Tcw_.translation() Twc_ not necessary as
   // Sophus has a method for easily computing the inverse pose: Tcw_.inverse()
 
-  Sophus::SE3<float> mTlr, mTrl;
+  Sophus::SE3<float> so_Tlr_, mTrl;
   Eigen::Matrix<float, 3, 3> mRlr;
   Eigen::Vector3f mtlr;
 
@@ -197,31 +197,31 @@ class Frame {
   ORBVocabulary *mpORBvocabulary;
 
   // Feature extractor. The right is used only in the stereo case.
-  ORBextractor *mpORBextractorLeft, *mpORBextractorRight;
+  ORBextractor *orb_extractor_left_, *orb_extractor_right_;
 
   // Frame timestamp.
-  double mTimeStamp;
+  double timestamp_;
 
   // Calibration matrix and OpenCV distortion parameters.
-  cv::Mat mK;
-  Eigen::Matrix3f mK_;
+  cv::Mat cv_K_;
+  Eigen::Matrix3f eig_K_;
   static float fx;
   static float fy;
   static float cx;
   static float cy;
   static float invfx;
   static float invfy;
-  cv::Mat mDistCoef;
+  cv::Mat dist_coef_;
 
   // Stereo baseline multiplied by fx.
-  float mbf;
+  float bf_;
 
   // Stereo baseline in meters.
   float mb;
 
   // Threshold close/far points. Close points are inserted from 1 view.
   // Far points are inserted as in the monocular case from 2 views.
-  float mThDepth;
+  float th_depth_;
 
   // Number of KeyPoints.
   int N;
@@ -299,9 +299,9 @@ class Frame {
   map<long unsigned int, cv::Point2f> mmProjectPoints;
   map<long unsigned int, cv::Point2f> mmMatchedInImage;
 
-  string mNameFile;
+  string file_name_;
 
-  int mnDataset;
+  int num_dataset_;
 
  private:
   // Undistort keypoints given OpenCV distortion parameters.
@@ -324,7 +324,7 @@ class Frame {
   std::mutex *mpMutexImu;
 
  public:
-  GeometricCamera *mpCamera, *mpCamera2;
+  GeometricCamera *cam_, *cam2_;
 
   // Number of KeyPoints extracted in the left and right images
   int Nleft, Nright;

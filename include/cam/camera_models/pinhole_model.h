@@ -40,20 +40,20 @@ class Pinhole : public GeometricCamera {
   Pinhole() {
     mvParameters.resize(4);
     mnId = nNextId++;
-    mnType = CAM_PINHOLE;
+    mnType = kCamPinhole;
   }
   Pinhole(const std::vector<float> _vParameters)
       : GeometricCamera(_vParameters), tvr(nullptr) {
     assert(mvParameters.size() == 4);
     mnId = nNextId++;
-    mnType = CAM_PINHOLE;
+    mnType = kCamPinhole;
   }
 
   Pinhole(Pinhole* pPinhole)
       : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
     assert(mvParameters.size() == 4);
     mnId = nNextId++;
-    mnType = CAM_PINHOLE;
+    mnType = kCamPinhole;
   }
 
   ~Pinhole() {
@@ -98,7 +98,7 @@ class Pinhole : public GeometricCamera {
   friend std::ostream& operator<<(std::ostream& os, const Pinhole& ph);
   friend std::istream& operator>>(std::istream& os, Pinhole& ph);
 
-  bool IsEqual(GeometricCamera* pCam);
+  bool IsEqual(GeometricCamera* cam);
 
  private:
   // Parameters vector corresponds to

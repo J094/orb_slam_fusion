@@ -41,7 +41,7 @@ class Settings;
 class Viewer {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Viewer(System* pSystem, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer,
+  Viewer(System* pSystem, FrameDrawer* frame_drawer, MapDrawer* map_drawer,
          Tracking* pTracking, const string& strSettingPath, Settings* settings);
 
   void newParameterLoader(Settings* settings);
@@ -73,7 +73,7 @@ class Viewer {
   bool Stop();
 
   System* mpSystem;
-  FrameDrawer* mpFrameDrawer;
+  FrameDrawer* frame_drawer_;
   MapDrawer* mpMapDrawer;
   Tracking* mpTracker;
 

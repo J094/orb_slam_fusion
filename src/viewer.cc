@@ -27,13 +27,13 @@
 
 namespace ORB_SLAM_FUSION {
 
-Viewer::Viewer(System *pSystem, FrameDrawer *pFrameDrawer,
-               MapDrawer *pMapDrawer, Tracking *pTracking,
+Viewer::Viewer(System *pSystem, FrameDrawer *frame_drawer,
+               MapDrawer *map_drawer, Tracking *pTracking,
                const string &strSettingPath, Settings *settings)
     : both(false),
       mpSystem(pSystem),
-      mpFrameDrawer(pFrameDrawer),
-      mpMapDrawer(pMapDrawer),
+      frame_drawer_(frame_drawer),
+      mpMapDrawer(map_drawer),
       mpTracker(pTracking),
       mbFinishRequested(false),
       mbFinished(true),
@@ -210,9 +210,9 @@ void Viewer::Run() {
   bool bStepByStep = false;
   bool bCameraView = true;
 
-  if (mpTracker->mSensor == mpSystem->MONOCULAR ||
-      mpTracker->mSensor == mpSystem->STEREO ||
-      mpTracker->mSensor == mpSystem->RGBD) {
+  if (mpTracker->sensor_ == mpSystem->kMonocular ||
+      mpTracker->sensor_ == mpSystem->kStereo ||
+      mpTracker->sensor_ == mpSystem->kRgbd) {
     menuShowGraph = true;
   }
 
@@ -263,7 +263,7 @@ void Viewer::Run() {
       s_cam.Follow(Twc);
     }
 
-    if (menuTopView && mpMapDrawer->mpAtlas->isImuInitialized()) {
+    if (menuTopView && mpMapDrawer->atlas_->isImuInitialized()) {
       menuTopView = false;
       bCameraView = false;
       s_cam.SetProjectionMatrix(pangolin::ProjectionMatrix(
@@ -307,10 +307,10 @@ void Viewer::Run() {
     pangolin::FinishFrame();
 
     cv::Mat toShow;
-    cv::Mat im = mpFrameDrawer->DrawFrame(trackedImageScale);
+    cv::Mat im = frame_drawer_->DrawFrame(trackedImageScale);
 
     if (both) {
-      cv::Mat imRight = mpFrameDrawer->DrawRightFrame(trackedImageScale);
+      cv::Mat imRight = frame_drawer_->DrawRightFrame(trackedImageScale);
       cv::hconcat(im, imRight, toShow);
     } else {
       toShow = im;

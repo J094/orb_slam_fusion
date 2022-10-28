@@ -38,11 +38,11 @@ class Settings;
 class MapDrawer {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  MapDrawer(Atlas *pAtlas, const string &strSettingPath, Settings *settings);
+  MapDrawer(Atlas *atlas, const string &strSettingPath, Settings *settings);
 
   void newParameterLoader(Settings *settings);
 
-  Atlas *mpAtlas;
+  Atlas *atlas_;
 
   void DrawMapPoints();
   void DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,

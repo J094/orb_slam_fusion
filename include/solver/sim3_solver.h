@@ -105,7 +105,7 @@ class Sim3Solver {
   Eigen::Vector3f mBestTranslation;
   float mBestScale;
 
-  // Scale is fixed to 1 in the stereo/RGBD case
+  // Scale is fixed to 1 in the stereo/kRgbd case
   bool mbFixScale;
 
   // Indices for random selection

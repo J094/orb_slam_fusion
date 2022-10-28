@@ -87,8 +87,8 @@ unsigned long int Atlas::GetLastInitKFid() {
   return mnLastInitKFidMap;
 }
 
-void Atlas::SetViewer(Viewer* pViewer) {
-  mpViewer = pViewer;
+void Atlas::SetViewer(Viewer* viewer) {
+  mpViewer = viewer;
   mHasViewer = true;
 }
 
@@ -102,23 +102,23 @@ void Atlas::AddMapPoint(MapPoint* pMP) {
   pMapMP->AddMapPoint(pMP);
 }
 
-GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam) {
+GeometricCamera* Atlas::AddCamera(GeometricCamera* cam) {
   // Check if the camera already exists
   bool bAlreadyInMap = false;
   int index_cam = -1;
   for (size_t i = 0; i < mvpCameras.size(); ++i) {
     GeometricCamera* pCam_i = mvpCameras[i];
-    if (!pCam) std::cout << "Not pCam" << std::endl;
+    if (!cam) std::cout << "Not cam" << std::endl;
     if (!pCam_i) std::cout << "Not pCam_i" << std::endl;
-    if (pCam->GetType() != pCam_i->GetType()) continue;
+    if (cam->GetType() != pCam_i->GetType()) continue;
 
-    if (pCam->GetType() == GeometricCamera::CAM_PINHOLE) {
-      if (((Pinhole*)pCam_i)->IsEqual(pCam)) {
+    if (cam->GetType() == GeometricCamera::kCamPinhole) {
+      if (((Pinhole*)pCam_i)->IsEqual(cam)) {
         bAlreadyInMap = true;
         index_cam = i;
       }
-    } else if (pCam->GetType() == GeometricCamera::CAM_FISHEYE) {
-      if (((KannalaBrandt8*)pCam_i)->IsEqual(pCam)) {
+    } else if (cam->GetType() == GeometricCamera::kCamFisheye) {
+      if (((KannalaBrandt8*)pCam_i)->IsEqual(cam)) {
         bAlreadyInMap = true;
         index_cam = i;
       }
@@ -128,8 +128,8 @@ GeometricCamera* Atlas::AddCamera(GeometricCamera* pCam) {
   if (bAlreadyInMap) {
     return mvpCameras[index_cam];
   } else {
-    mvpCameras.push_back(pCam);
-    return pCam;
+    mvpCameras.push_back(cam);
+    return cam;
   }
 }
 
@@ -285,32 +285,32 @@ void Atlas::PreSave() {
 
 void Atlas::PostLoad() {
   map<unsigned int, GeometricCamera*> mpCams;
-  for (GeometricCamera* pCam : mvpCameras) {
-    mpCams[pCam->GetId()] = pCam;
+  for (GeometricCamera* cam : mvpCameras) {
+    mpCams[cam->GetId()] = cam;
   }
 
   mspMaps.clear();
-  unsigned long int numKF = 0, numMP = 0;
+  unsigned long int nuK_F = 0, numMP = 0;
   for (Map* pMi : mvpBackupMaps) {
     mspMaps.insert(pMi);
-    pMi->PostLoad(mpKeyFrameDB, mpORBVocabulary, mpCams);
-    numKF += pMi->GetAllKeyFrames().size();
+    pMi->PostLoad(mpKeyFrameDB, orb_voc_, mpCams);
+    nuK_F += pMi->GetAllKeyFrames().size();
     numMP += pMi->GetAllMapPoints().size();
   }
   mvpBackupMaps.clear();
 }
 
-void Atlas::SetKeyFrameDababase(KeyFrameDatabase* pKFDB) {
-  mpKeyFrameDB = pKFDB;
+void Atlas::SetKeyFrameDababase(KeyFrameDatabase* kf_database) {
+  mpKeyFrameDB = kf_database;
 }
 
 KeyFrameDatabase* Atlas::GetKeyFrameDatabase() { return mpKeyFrameDB; }
 
 void Atlas::SetORBVocabulary(ORBVocabulary* pORBVoc) {
-  mpORBVocabulary = pORBVoc;
+  orb_voc_ = pORBVoc;
 }
 
-ORBVocabulary* Atlas::GetORBVocabulary() { return mpORBVocabulary; }
+ORBVocabulary* Atlas::GetORBVocabulary() { return orb_voc_; }
 
 long unsigned int Atlas::GetNumLivedKF() {
   unique_lock<mutex> lock(mMutexAtlas);

@@ -81,7 +81,7 @@ class Atlas {
 
   unsigned long int GetLastInitKFid();
 
-  void SetViewer(Viewer* pViewer);
+  void SetViewer(Viewer* viewer);
 
   // Method for change components in the current map
   void AddKeyFrame(KeyFrame* pKF);
@@ -89,7 +89,7 @@ class Atlas {
   // void EraseMapPoint(MapPoint* pMP);
   // void EraseKeyFrame(KeyFrame* pKF);
 
-  GeometricCamera* AddCamera(GeometricCamera* pCam);
+  GeometricCamera* AddCamera(GeometricCamera* cam);
   std::vector<GeometricCamera*> GetAllCameras();
 
   /* All methods without Map pointer work on current map */
@@ -129,7 +129,7 @@ class Atlas {
 
   map<long unsigned int, KeyFrame*> GetAtlasKeyframes();
 
-  void SetKeyFrameDababase(KeyFrameDatabase* pKFDB);
+  void SetKeyFrameDababase(KeyFrameDatabase* kf_database);
   KeyFrameDatabase* GetKeyFrameDatabase();
 
   void SetORBVocabulary(ORBVocabulary* pORBVoc);
@@ -157,7 +157,7 @@ class Atlas {
 
   // Class references for the map reconstruction from the save file
   KeyFrameDatabase* mpKeyFrameDB;
-  ORBVocabulary* mpORBVocabulary;
+  ORBVocabulary* orb_voc_;
 
   // Mutex
   std::mutex mMutexAtlas;

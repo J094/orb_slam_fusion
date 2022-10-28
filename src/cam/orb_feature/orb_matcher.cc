@@ -308,14 +308,14 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF, Frame &F,
             vpMapPointMatches[bestIdxF] = pMP;
 
             const cv::KeyPoint &kp =
-                (!pKF->mpCamera2) ? pKF->mvKeysUn[realIdxKF]
+                (!pKF->cam2_) ? pKF->mvKeysUn[realIdxKF]
                 : (realIdxKF >= pKF->NLeft)
                     ? pKF->mvKeysRight[realIdxKF - pKF->NLeft]
                     : pKF->mvKeys[realIdxKF];
 
             if (mbCheckOrientation) {
               cv::KeyPoint &Fkp =
-                  (!pKF->mpCamera2 || F.Nleft == -1) ? F.mvKeys[bestIdxF]
+                  (!pKF->cam2_ || F.Nleft == -1) ? F.mvKeys[bestIdxF]
                   : (bestIdxF >= F.Nleft) ? F.mvKeysRight[bestIdxF - F.Nleft]
                                           : F.mvKeys[bestIdxF];
 
@@ -336,13 +336,13 @@ int ORBmatcher::SearchByBoW(KeyFrame *pKF, Frame &F,
               vpMapPointMatches[bestIdxFR] = pMP;
 
               const cv::KeyPoint &kp =
-                  (!pKF->mpCamera2) ? pKF->mvKeysUn[realIdxKF]
+                  (!pKF->cam2_) ? pKF->mvKeysUn[realIdxKF]
                   : (realIdxKF >= pKF->NLeft)
                       ? pKF->mvKeysRight[realIdxKF - pKF->NLeft]
                       : pKF->mvKeys[realIdxKF];
 
               if (mbCheckOrientation) {
-                cv::KeyPoint &Fkp = (!F.mpCamera2) ? F.mvKeys[bestIdxFR]
+                cv::KeyPoint &Fkp = (!F.cam2_) ? F.mvKeys[bestIdxFR]
                                     : (bestIdxFR >= F.Nleft)
                                         ? F.mvKeysRight[bestIdxFR - F.Nleft]
                                         : F.mvKeys[bestIdxFR];
@@ -425,7 +425,7 @@ int ORBmatcher::SearchByProjection(KeyFrame *pKF, Sophus::Sim3f &Scw,
     if (p3Dc(2) < 0.0) continue;
 
     // Project into Image
-    const Eigen::Vector2f uv = pKF->mpCamera->project(p3Dc);
+    const Eigen::Vector2f uv = pKF->cam_->project(p3Dc);
 
     // Point must be inside the image
     if (!pKF->IsInImage(uv(0), uv(1))) continue;
@@ -828,15 +828,15 @@ int ORBmatcher::SearchForTriangulation(
   Eigen::Vector3f Cw = pKF1->GetCameraCenter();
   Eigen::Vector3f C2 = T2w * Cw;
 
-  Eigen::Vector2f ep = pKF2->mpCamera->project(C2);
+  Eigen::Vector2f ep = pKF2->cam_->project(C2);
   Sophus::SE3f T12;
   Sophus::SE3f Tll, Tlr, Trl, Trr;
   Eigen::Matrix3f R12;  // for fastest computation
   Eigen::Vector3f t12;  // for fastest computation
 
-  GeometricCamera *pCamera1 = pKF1->mpCamera, *pCamera2 = pKF2->mpCamera;
+  GeometricCamera *pCamera1 = pKF1->cam_, *pCamera2 = pKF2->cam_;
 
-  if (!pKF1->mpCamera2 && !pKF2->mpCamera2) {
+  if (!pKF1->cam2_ && !pKF2->cam2_) {
     T12 = T1w * Tw2;
     R12 = T12.rotationMatrix();
     t12 = T12.translation();
@@ -884,7 +884,7 @@ int ORBmatcher::SearchForTriangulation(
           continue;
         }
 
-        const bool bStereo1 = (!pKF1->mpCamera2 && pKF1->mvuRight[idx1] >= 0);
+        const bool bStereo1 = (!pKF1->cam2_ && pKF1->mvuRight[idx1] >= 0);
 
         if (bOnlyStereo)
           if (!bStereo1) continue;
@@ -910,7 +910,7 @@ int ORBmatcher::SearchForTriangulation(
           // If we have already matched or there is a MapPoint skip
           if (vbMatched2[idx2] || pMP2) continue;
 
-          const bool bStereo2 = (!pKF2->mpCamera2 && pKF2->mvuRight[idx2] >= 0);
+          const bool bStereo2 = (!pKF2->cam2_ && pKF2->mvuRight[idx2] >= 0);
 
           if (bOnlyStereo)
             if (!bStereo2) continue;
@@ -928,7 +928,7 @@ int ORBmatcher::SearchForTriangulation(
           const bool bRight2 =
               (pKF2->NLeft == -1 || idx2 < pKF2->NLeft) ? false : true;
 
-          if (!bStereo1 && !bStereo2 && !pKF1->mpCamera2) {
+          if (!bStereo1 && !bStereo2 && !pKF1->cam2_) {
             const float distex = ep(0) - kp2.pt.x;
             const float distey = ep(1) - kp2.pt.y;
             if (distex * distex + distey * distey <
@@ -937,35 +937,35 @@ int ORBmatcher::SearchForTriangulation(
             }
           }
 
-          if (pKF1->mpCamera2 && pKF2->mpCamera2) {
+          if (pKF1->cam2_ && pKF2->cam2_) {
             if (bRight1 && bRight2) {
               R12 = Rrr;
               t12 = trr;
               T12 = Trr;
 
-              pCamera1 = pKF1->mpCamera2;
-              pCamera2 = pKF2->mpCamera2;
+              pCamera1 = pKF1->cam2_;
+              pCamera2 = pKF2->cam2_;
             } else if (bRight1 && !bRight2) {
               R12 = Rrl;
               t12 = trl;
               T12 = Trl;
 
-              pCamera1 = pKF1->mpCamera2;
-              pCamera2 = pKF2->mpCamera;
+              pCamera1 = pKF1->cam2_;
+              pCamera2 = pKF2->cam_;
             } else if (!bRight1 && bRight2) {
               R12 = Rlr;
               t12 = tlr;
               T12 = Tlr;
 
-              pCamera1 = pKF1->mpCamera;
-              pCamera2 = pKF2->mpCamera2;
+              pCamera1 = pKF1->cam_;
+              pCamera2 = pKF2->cam2_;
             } else {
               R12 = Rll;
               t12 = tll;
               T12 = Tll;
 
-              pCamera1 = pKF1->mpCamera;
-              pCamera2 = pKF2->mpCamera;
+              pCamera1 = pKF1->cam_;
+              pCamera2 = pKF2->cam_;
             }
           }
 
@@ -1048,18 +1048,18 @@ int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints,
   if (bRight) {
     Tcw = pKF->GetRightPose();
     Ow = pKF->GetRightCameraCenter();
-    pCamera = pKF->mpCamera2;
+    pCamera = pKF->cam2_;
   } else {
     Tcw = pKF->GetPose();
     Ow = pKF->GetCameraCenter();
-    pCamera = pKF->mpCamera;
+    pCamera = pKF->cam_;
   }
 
   const float &fx = pKF->fx;
   const float &fy = pKF->fy;
   const float &cx = pKF->cx;
   const float &cy = pKF->cy;
-  const float &bf = pKF->mbf;
+  const float &bf = pKF->bf_;
 
   int nFused = 0;
 
@@ -1249,7 +1249,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, Sophus::Sim3f &Scw,
     if (p3Dc(2) < 0.0f) continue;
 
     // Project into Image
-    const Eigen::Vector2f uv = pKF->mpCamera->project(p3Dc);
+    const Eigen::Vector2f uv = pKF->cam_->project(p3Dc);
 
     // Point must be inside the image
     if (!pKF->IsInImage(uv(0), uv(1))) continue;
@@ -1549,7 +1549,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
 
         if (invzc < 0) continue;
 
-        Eigen::Vector2f uv = CurrentFrame.mpCamera->project(x3Dc);
+        Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dc);
 
         if (uv(0) < CurrentFrame.mnMinX || uv(0) > CurrentFrame.mnMaxX)
           continue;
@@ -1592,7 +1592,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
             if (CurrentFrame.mvpMapPoints[i2]->Observations() > 0) continue;
 
           if (CurrentFrame.Nleft == -1 && CurrentFrame.mvuRight[i2] > 0) {
-            const float ur = uv(0) - CurrentFrame.mbf * invzc;
+            const float ur = uv(0) - CurrentFrame.bf_ * invzc;
             const float er = fabs(ur - CurrentFrame.mvuRight[i2]);
             if (er > radius) continue;
           }
@@ -1633,7 +1633,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
         }
         if (CurrentFrame.Nleft != -1) {
           Eigen::Vector3f x3Dr = CurrentFrame.GetRelativePoseTrl() * x3Dc;
-          Eigen::Vector2f uv = CurrentFrame.mpCamera->project(x3Dr);
+          Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dr);
 
           int nLastOctave =
               (LastFrame.Nleft == -1 || i < LastFrame.Nleft)
@@ -1753,7 +1753,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF,
         Eigen::Vector3f x3Dw = pMP->GetWorldPos();
         Eigen::Vector3f x3Dc = Tcw * x3Dw;
 
-        const Eigen::Vector2f uv = CurrentFrame.mpCamera->project(x3Dc);
+        const Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dc);
 
         if (uv(0) < CurrentFrame.mnMinX || uv(0) > CurrentFrame.mnMaxX)
           continue;

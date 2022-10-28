@@ -31,7 +31,7 @@ using namespace std;
 namespace ORB_SLAM_FUSION {
 TwoViewReconstruction::TwoViewReconstruction(const Eigen::Matrix3f &k,
                                              float sigma, int iterations) {
-  mK = k;
+  cv_K_ = k;
 
   mSigma = sigma;
   mSigma2 = sigma * sigma;
@@ -119,12 +119,12 @@ bool TwoViewReconstruction::Reconstruct(const std::vector<cv::KeyPoint> &vKeys1,
   if (RH > 0.50)  // if(RH>0.40)
   {
     // cout << "Initialization from Homography" << endl;
-    return ReconstructH(vbMatchesInliersH, H, mK, T21, vP3D, vbTriangulated,
+    return ReconstructH(vbMatchesInliersH, H, cv_K_, T21, vP3D, vbTriangulated,
                         minParallax, 50);
   } else  // if(pF_HF>0.6)
   {
     // cout << "Initialization from Fundamental" << endl;
-    return ReconstructF(vbMatchesInliersF, F, mK, T21, vP3D, vbTriangulated,
+    return ReconstructF(vbMatchesInliersF, F, cv_K_, T21, vP3D, vbTriangulated,
                         minParallax, 50);
   }
 }

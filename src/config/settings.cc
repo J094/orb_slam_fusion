@@ -153,7 +153,7 @@ Settings::Settings(const std::string& configFile, const int& sensor)
   cout << "\t-Loaded camera 1" << endl;
 
   // Read second camera if stereo (not rectified)
-  if (sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) {
+  if (sensor_ == System::kStereo || sensor_ == System::kImuStereo) {
     readCamera2(fSettings);
     cout << "\t-Loaded camera 2" << endl;
   }
@@ -162,13 +162,13 @@ Settings::Settings(const std::string& configFile, const int& sensor)
   readImageInfo(fSettings);
   cout << "\t-Loaded image info" << endl;
 
-  if (sensor_ == System::IMU_MONOCULAR || sensor_ == System::IMU_STEREO ||
-      sensor_ == System::IMU_RGBD) {
+  if (sensor_ == System::kImuMonocular || sensor_ == System::kImuStereo ||
+      sensor_ == System::kImuRgbd) {
     readIMU(fSettings);
     cout << "\t-Loaded IMU calibration" << endl;
   }
 
-  if (sensor_ == System::RGBD || sensor_ == System::IMU_RGBD) {
+  if (sensor_ == System::kRgbd || sensor_ == System::kImuRgbd) {
     readRGBD(fSettings);
     cout << "\t-Loaded RGB-D calibration" << endl;
   }
@@ -233,7 +233,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
     }
 
     // Check if we need to correct distortion from the images
-    if ((sensor_ == System::MONOCULAR || sensor_ == System::IMU_MONOCULAR) &&
+    if ((sensor_ == System::kMonocular || sensor_ == System::kImuMonocular) &&
         vPinHoleDistorsion1_.size() != 0) {
       bNeedToUndistort_ = true;
     }
@@ -253,7 +253,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
 
     // Rectified images are assumed to be ideal PinHole images (no distortion)
   } else if (cameraModel == "KannalaBrandt8") {
-    cameraType_ = KannalaBrandt;
+    cameraType_ = kKannalaBrandt;
 
     // Read intrinsic parameters
     float fx = readParameter<float>(fSettings, "Camera1.fx", found);
@@ -271,7 +271,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
     calibration1_ = new KannalaBrandt8(vCalibration);
     originalCalib1_ = new KannalaBrandt8(vCalibration);
 
-    if (sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) {
+    if (sensor_ == System::kStereo || sensor_ == System::kImuStereo) {
       int colBegin =
           readParameter<int>(fSettings, "Camera1.overlappingBegin", found);
       int colEnd =
@@ -323,7 +323,7 @@ void Settings::readCamera2(cv::FileStorage& fSettings) {
       vPinHoleDistorsion2_[3] =
           readParameter<float>(fSettings, "Camera2.p2", found);
     }
-  } else if (cameraType_ == KannalaBrandt) {
+  } else if (cameraType_ == kKannalaBrandt) {
     // Read intrinsic parameters
     float fx = readParameter<float>(fSettings, "Camera2.fx", found);
     float fy = readParameter<float>(fSettings, "Camera2.fy", found);
@@ -389,7 +389,7 @@ void Settings::readImageInfo(cv::FileStorage& fSettings) {
       calibration1_->setParameter(
           calibration1_->getParameter(3) * scaleRowFactor, 3);
 
-      if ((sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) &&
+      if ((sensor_ == System::kStereo || sensor_ == System::kImuStereo) &&
           cameraType_ != Rectified) {
         calibration2_->setParameter(
             calibration2_->getParameter(1) * scaleRowFactor, 1);
@@ -413,14 +413,14 @@ void Settings::readImageInfo(cv::FileStorage& fSettings) {
       calibration1_->setParameter(
           calibration1_->getParameter(2) * scaleColFactor, 2);
 
-      if ((sensor_ == System::STEREO || sensor_ == System::IMU_STEREO) &&
+      if ((sensor_ == System::kStereo || sensor_ == System::kImuStereo) &&
           cameraType_ != Rectified) {
         calibration2_->setParameter(
             calibration2_->getParameter(0) * scaleColFactor, 0);
         calibration2_->setParameter(
             calibration2_->getParameter(2) * scaleColFactor, 2);
 
-        if (cameraType_ == KannalaBrandt) {
+        if (cameraType_ == kKannalaBrandt) {
           static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea[0] *=
               scaleColFactor;
           static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea[1] *=
@@ -463,7 +463,7 @@ void Settings::readRGBD(cv::FileStorage& fSettings) {
   bool found;
 
   depthMapFactor_ =
-      readParameter<float>(fSettings, "RGBD.DepthMapFactor", found);
+      readParameter<float>(fSettings, "kRgbd.DepthMapFactor", found);
   thDepth_ = readParameter<float>(fSettings, "Stereo.ThDepth", found);
   b_ = readParameter<float>(fSettings, "Stereo.b", found);
   bf_ = b_ * calibration1_->getParameter(0);
@@ -555,7 +555,7 @@ void Settings::precomputeRectificationMaps() {
   bf_ = b_ * P1.at<double>(0, 0);
 
   // Update relative pose between camera 1 and IMU if necessary
-  if (sensor_ == System::IMU_STEREO) {
+  if (sensor_ == System::kImuStereo) {
     Eigen::Matrix3f eigenR_r1_u1;
     cv::cv2eigen(R_r1_u1, eigenR_r1_u1);
     Sophus::SE3f T_r1_u1(eigenR_r1_u1, Eigen::Vector3f::Zero());
@@ -588,8 +588,8 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
     output << " ]" << endl;
   }
 
-  if (settings.sensor_ == System::STEREO ||
-      settings.sensor_ == System::IMU_STEREO) {
+  if (settings.sensor_ == System::kStereo ||
+      settings.sensor_ == System::kImuStereo) {
     output << "\t-Camera 2 parameters (";
     if (settings.cameraType_ == Settings::PinHole ||
         settings.cameraType_ == Settings::Rectified) {
@@ -631,9 +631,9 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
     }
     output << " ]" << endl;
 
-    if ((settings.sensor_ == System::STEREO ||
-         settings.sensor_ == System::IMU_STEREO) &&
-        settings.cameraType_ == Settings::KannalaBrandt) {
+    if ((settings.sensor_ == System::kStereo ||
+         settings.sensor_ == System::kImuStereo) &&
+        settings.cameraType_ == Settings::kKannalaBrandt) {
       output << "\t-Camera 2 parameters after resize: [ ";
       for (size_t i = 0; i < settings.calibration2_->size(); i++) {
         output << " " << settings.calibration2_->getParameter(i);
@@ -645,12 +645,12 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
   output << "\t-Sequence FPS: " << settings.fps_ << endl;
 
   // Stereo stuff
-  if (settings.sensor_ == System::STEREO ||
-      settings.sensor_ == System::IMU_STEREO) {
+  if (settings.sensor_ == System::kStereo ||
+      settings.sensor_ == System::kImuStereo) {
     output << "\t-Stereo baseline: " << settings.b_ << endl;
     output << "\t-Stereo depth threshold : " << settings.thDepth_ << endl;
 
-    if (settings.cameraType_ == Settings::KannalaBrandt) {
+    if (settings.cameraType_ == Settings::kKannalaBrandt) {
       auto vOverlapping1 =
           static_cast<KannalaBrandt8*>(settings.calibration1_)->mvLappingArea;
       auto vOverlapping2 =
@@ -662,9 +662,9 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
     }
   }
 
-  if (settings.sensor_ == System::IMU_MONOCULAR ||
-      settings.sensor_ == System::IMU_STEREO ||
-      settings.sensor_ == System::IMU_RGBD) {
+  if (settings.sensor_ == System::kImuMonocular ||
+      settings.sensor_ == System::kImuStereo ||
+      settings.sensor_ == System::kImuRgbd) {
     output << "\t-Gyro noise: " << settings.noiseGyro_ << endl;
     output << "\t-Accelerometer noise: " << settings.noiseAcc_ << endl;
     output << "\t-Gyro walk: " << settings.gyroWalk_ << endl;
@@ -672,8 +672,8 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
     output << "\t-IMU frequency: " << settings.imuFrequency_ << endl;
   }
 
-  if (settings.sensor_ == System::RGBD ||
-      settings.sensor_ == System::IMU_RGBD) {
+  if (settings.sensor_ == System::kRgbd ||
+      settings.sensor_ == System::kImuRgbd) {
     output << "\t-RGB-D depth map factor: " << settings.depthMapFactor_ << endl;
   }
 

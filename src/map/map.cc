@@ -374,7 +374,7 @@ void Map::PreSave(std::set<GeometricCamera*>& spCams) {
 }
 
 void Map::PostLoad(
-    KeyFrameDatabase* pKFDB,
+    KeyFrameDatabase* kf_database,
     ORBVocabulary*
         pORBVoc /*, map<long unsigned int, KeyFrame*>& mpKeyFrameId*/,
     map<unsigned int, GeometricCamera*>& mpCams) {
@@ -397,7 +397,7 @@ void Map::PostLoad(
 
     pKFi->UpdateMap(this);
     pKFi->SetORBVocabulary(pORBVoc);
-    pKFi->SetKeyFrameDatabase(pKFDB);
+    pKFi->SetKeyFrameDatabase(kf_database);
     mpKeyFrameId[pKFi->mnId] = pKFi;
   }
 
@@ -412,7 +412,7 @@ void Map::PostLoad(
     if (!pKFi || pKFi->isBad()) continue;
 
     pKFi->PostLoad(mpKeyFrameId, mpMapPointId, mpCams);
-    pKFDB->add(pKFi);
+    kf_database->add(pKFi);
   }
 
   if (mnBackupKFinitialID != -1) {

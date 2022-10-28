@@ -32,7 +32,7 @@ long unsigned int KeyFrame::nNextId = 0;
 
 KeyFrame::KeyFrame()
     : mnFrameId(0),
-      mTimeStamp(0),
+      timestamp_(0),
       mnGridCols(FRAME_GRID_COLS),
       mnGridRows(FRAME_GRID_ROWS),
       mfGridElementWidthInv(0),
@@ -58,9 +58,9 @@ KeyFrame::KeyFrame()
       mnPlaceRecognitionQuery(0),
       mnPlaceRecognitionWords(0),
       mPlaceRecognitionScore(0),
-      mbf(0),
+      bf_(0),
       mb(0),
-      mThDepth(0),
+      th_depth_(0),
       N(0),
       mvKeys(static_cast<vector<cv::KeyPoint>>(NULL)),
       mvKeysUn(static_cast<vector<cv::KeyPoint>>(NULL)),
@@ -91,10 +91,10 @@ KeyFrame::KeyFrame()
       mnNumberOfOpt(0),
       mbHasVelocity(false) {}
 
-KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
+KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *kf_database)
     : bImu(pMap->isImuInitialized()),
       mnFrameId(F.mnId),
-      mTimeStamp(F.mTimeStamp),
+      timestamp_(F.timestamp_),
       mnGridCols(FRAME_GRID_COLS),
       mnGridRows(FRAME_GRID_ROWS),
       mfGridElementWidthInv(F.mfGridElementWidthInv),
@@ -118,9 +118,9 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       cy(F.cy),
       invfx(F.invfx),
       invfy(F.invfy),
-      mbf(F.mbf),
+      bf_(F.bf_),
       mb(F.mb),
-      mThDepth(F.mThDepth),
+      th_depth_(F.th_depth_),
       N(F.N),
       mvKeys(F.mvKeys),
       mvKeysUn(F.mvKeysUn),
@@ -139,31 +139,31 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *pKFDB)
       mnMinY(F.mnMinY),
       mnMaxX(F.mnMaxX),
       mnMaxY(F.mnMaxY),
-      mK_(F.mK_),
+      eig_K_(F.eig_K_),
       mPrevKF(NULL),
       mNextKF(NULL),
       mpImuPreintegrated(F.mpImuPreintegrated),
       mImuCalib(F.mImuCalib),
       mvpMapPoints(F.mvpMapPoints),
-      mpKeyFrameDB(pKFDB),
+      mpKeyFrameDB(kf_database),
       mpORBvocabulary(F.mpORBvocabulary),
       mbFirstConnection(true),
       mpParent(NULL),
-      mDistCoef(F.mDistCoef),
+      dist_coef_(F.dist_coef_),
       mbNotErase(false),
-      mnDataset(F.mnDataset),
+      num_dataset_(F.num_dataset_),
       mbToBeErased(false),
       mbBad(false),
       mHalfBaseline(F.mb / 2),
       mpMap(pMap),
       mbCurrentPlaceRecognition(false),
-      mNameFile(F.mNameFile),
+      file_name_(F.file_name_),
       mnMergeCorrectedForKF(0),
-      mpCamera(F.mpCamera),
-      mpCamera2(F.mpCamera2),
+      cam_(F.cam_),
+      cam2_(F.cam2_),
       mvLeftToRightMatch(F.mvLeftToRightMatch),
       mvRightToLeftMatch(F.mvRightToLeftMatch),
-      mTlr(F.GetRelativePoseTlr()),
+      so_Tlr_(F.GetRelativePoseTlr()),
       mvKeysRight(F.mvKeysRight),
       NLeft(F.Nleft),
       NRight(F.Nright),
@@ -910,12 +910,12 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
 
   // Camera data
   mnBackupIdCamera = -1;
-  if (mpCamera && spCam.find(mpCamera) != spCam.end())
-    mnBackupIdCamera = mpCamera->GetId();
+  if (cam_ && spCam.find(cam_) != spCam.end())
+    mnBackupIdCamera = cam_->GetId();
 
   mnBackupIdCamera2 = -1;
-  if (mpCamera2 && spCam.find(mpCamera2) != spCam.end())
-    mnBackupIdCamera2 = mpCamera2->GetId();
+  if (cam2_ && spCam.find(cam2_) != spCam.end())
+    mnBackupIdCamera2 = cam2_->GetId();
 
   // Inertial data
   mBackupPrevKFId = -1;
@@ -937,7 +937,7 @@ void KeyFrame::PostLoad(map<long unsigned int, KeyFrame *> &mpKFid,
   // Pose
   SetPose(mTcw);
 
-  mTrl = mTlr.inverse();
+  mTrl = so_Tlr_.inverse();
 
   // Reference reconstruction
   // Each MapPoint sight from this KeyFrame
@@ -992,12 +992,12 @@ void KeyFrame::PostLoad(map<long unsigned int, KeyFrame *> &mpKFid,
 
   // Camera data
   if (mnBackupIdCamera >= 0) {
-    mpCamera = mpCamId[mnBackupIdCamera];
+    cam_ = mpCamId[mnBackupIdCamera];
   } else {
     cout << "ERROR: There is not a main camera in KF " << mnId << endl;
   }
   if (mnBackupIdCamera2 >= 0) {
-    mpCamera2 = mpCamId[mnBackupIdCamera2];
+    cam2_ = mpCamId[mnBackupIdCamera2];
   }
 
   // Inertial data
@@ -1048,13 +1048,13 @@ bool KeyFrame::ProjectPointDistort(MapPoint *pMP, cv::Point2f &kp, float &u,
   float x = (u - cx) * invfx;
   float y = (v - cy) * invfy;
   float r2 = x * x + y * y;
-  float k1 = mDistCoef.at<float>(0);
-  float k2 = mDistCoef.at<float>(1);
-  float p1 = mDistCoef.at<float>(2);
-  float p2 = mDistCoef.at<float>(3);
+  float k1 = dist_coef_.at<float>(0);
+  float k2 = dist_coef_.at<float>(1);
+  float p1 = dist_coef_.at<float>(2);
+  float p2 = dist_coef_.at<float>(3);
   float k3 = 0;
-  if (mDistCoef.total() == 5) {
-    k3 = mDistCoef.at<float>(4);
+  if (dist_coef_.total() == 5) {
+    k3 = dist_coef_.at<float>(4);
   }
 
   // Radial distorsion
@@ -1113,7 +1113,7 @@ Sophus::SE3f KeyFrame::GetRelativePoseTrl() {
 
 Sophus::SE3f KeyFrame::GetRelativePoseTlr() {
   unique_lock<mutex> lock(mMutexPose);
-  return mTlr;
+  return so_Tlr_;
 }
 
 Sophus::SE3<float> KeyFrame::GetRightPose() {
@@ -1125,13 +1125,13 @@ Sophus::SE3<float> KeyFrame::GetRightPose() {
 Sophus::SE3<float> KeyFrame::GetRightPoseInverse() {
   unique_lock<mutex> lock(mMutexPose);
 
-  return mTwc * mTlr;
+  return mTwc * so_Tlr_;
 }
 
 Eigen::Vector3f KeyFrame::GetRightCameraCenter() {
   unique_lock<mutex> lock(mMutexPose);
 
-  return (mTwc * mTlr).translation();
+  return (mTwc * so_Tlr_).translation();
 }
 
 Eigen::Matrix<float, 3, 3> KeyFrame::GetRightRotation() {
@@ -1149,8 +1149,8 @@ void KeyFrame::SetORBVocabulary(ORBVocabulary *pORBVoc) {
   mpORBvocabulary = pORBVoc;
 }
 
-void KeyFrame::SetKeyFrameDatabase(KeyFrameDatabase *pKFDB) {
-  mpKeyFrameDB = pKFDB;
+void KeyFrame::SetKeyFrameDatabase(KeyFrameDatabase *kf_database) {
+  mpKeyFrameDB = kf_database;
 }
 
 }  // namespace ORB_SLAM_FUSION

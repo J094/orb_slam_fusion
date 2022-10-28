@@ -30,9 +30,9 @@
 
 namespace ORB_SLAM_FUSION {
 
-MapDrawer::MapDrawer(Atlas *pAtlas, const string &strSettingPath,
+MapDrawer::MapDrawer(Atlas *atlas, const string &strSettingPath,
                      Settings *settings)
-    : mpAtlas(pAtlas) {
+    : atlas_(atlas) {
   if (settings) {
     newParameterLoader(settings);
   } else {
@@ -126,7 +126,7 @@ bool MapDrawer::ParseViewerParamFile(cv::FileStorage &fSettings) {
 }
 
 void MapDrawer::DrawMapPoints() {
-  Map *pActiveMap = mpAtlas->GetCurrentMap();
+  Map *pActiveMap = atlas_->GetCurrentMap();
   if (!pActiveMap) return;
 
   const vector<MapPoint *> &vpMPs = pActiveMap->GetAllMapPoints();
@@ -168,7 +168,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,
   const float h = w * 0.75;
   const float z = w * 0.6;
 
-  Map *pActiveMap = mpAtlas->GetCurrentMap();
+  Map *pActiveMap = atlas_->GetCurrentMap();
   // DEBUG LBA
   std::set<long unsigned int> sOptKFs = pActiveMap->msOptKFs;
   std::set<long unsigned int> sFixedKFs = pActiveMap->msFixedKFs;
@@ -301,7 +301,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,
     glEnd();
   }
 
-  vector<Map *> vpMaps = mpAtlas->GetAllMaps();
+  vector<Map *> vpMaps = atlas_->GetAllMaps();
 
   if (bDrawKF) {
     for (Map *pMap : vpMaps) {

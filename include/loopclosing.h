@@ -49,7 +49,7 @@ class LoopClosing {
       KeyFrameAndPose;
 
  public:
-  LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc,
+  LoopClosing(Atlas* atlas, KeyFrameDatabase* pDB, ORBVocabulary* voc,
               const bool bFixScale, const bool bActiveLC);
 
   void SetTracker(Tracking* pTracker);
@@ -134,11 +134,11 @@ class LoopClosing {
   bool mbFinished;
   std::mutex mMutexFinish;
 
-  Atlas* mpAtlas;
+  Atlas* atlas_;
   Tracking* mpTracker;
 
   KeyFrameDatabase* mpKeyFrameDB;
-  ORBVocabulary* mpORBVocabulary;
+  ORBVocabulary* orb_voc_;
 
   LocalMapping* mpLocalMapper;
 
@@ -213,10 +213,6 @@ class LoopClosing {
 
   // To (de)activate LC
   bool mbActiveLC = true;
-
-#ifdef REGISTER_LOOP
-  string mstrFolderLoop;
-#endif
 };
 
 }  // namespace ORB_SLAM_FUSION

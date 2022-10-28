@@ -132,7 +132,7 @@ class Map {
 
   void PreSave(std::set<GeometricCamera*>& spCams);
   void PostLoad(
-      KeyFrameDatabase* pKFDB,
+      KeyFrameDatabase* kf_database,
       ORBVocabulary*
           pORBVoc /*, map<long unsigned int, KeyFrame*>& mpKeyFrameId*/,
       map<unsigned int, GeometricCamera*>& mpCams);

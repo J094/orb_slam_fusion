@@ -427,10 +427,10 @@ void KannalaBrandt8::Triangulate(const cv::Point2f &p1, const cv::Point2f &p2,
   x3D = x3Dh.head(3) / x3Dh(3);
 }
 
-bool KannalaBrandt8::IsEqual(GeometricCamera *pCam) {
-  if (pCam->GetType() != GeometricCamera::CAM_FISHEYE) return false;
+bool KannalaBrandt8::IsEqual(GeometricCamera *cam) {
+  if (cam->GetType() != GeometricCamera::kCamFisheye) return false;
 
-  KannalaBrandt8 *pKBCam = (KannalaBrandt8 *)pCam;
+  KannalaBrandt8 *pKBCam = (KannalaBrandt8 *)cam;
 
   if (abs(precision - pKBCam->GetPrecision()) > 1e-6) return false;
 

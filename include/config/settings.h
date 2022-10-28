@@ -45,7 +45,7 @@ class Settings {
   /*
    * Enum for the different camera types implemented
    */
-  enum CameraType { PinHole = 0, Rectified = 1, KannalaBrandt = 2 };
+  enum CameraType { PinHole = 0, Rectified = 1, kKannalaBrandt = 2 };
 
   /*
    * Delete default constructor
@@ -201,7 +201,7 @@ class Settings {
   bool insertKFsWhenLost_;
 
   /*
-   * RGBD stuff
+   * kRgbd stuff
    */
   float depthMapFactor_;
 

@@ -77,12 +77,12 @@ class System {
  public:
   // Input sensor
   enum eSensor {
-    MONOCULAR = 0,
-    STEREO = 1,
-    RGBD = 2,
-    IMU_MONOCULAR = 3,
-    IMU_STEREO = 4,
-    IMU_RGBD = 5,
+    kMonocular = 0,
+    kStereo = 1,
+    kRgbd = 2,
+    kImuMonocular = 3,
+    kImuStereo = 4,
+    kImuRgbd = 5,
   };
 
   // File type
@@ -177,7 +177,7 @@ class System {
   // LoadMap(const string &filename);
 
   // Information from most recent processed frame
-  // You can call this right after TrackMonocular (or stereo or RGBD)
+  // You can call this right after TrackMonocular (or stereo or kRgbd)
   int GetTrackingState();
   std::vector<MapPoint*> GetTrackedMapPoints();
   std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
@@ -198,7 +198,7 @@ class System {
   string CalculateCheckSum(string filename, int type);
 
   // Input sensor
-  eSensor mSensor;
+  eSensor sensor_;
 
   // ORB vocabulary used for place recognition and feature matching.
   ORBVocabulary* mpVocabulary;
@@ -209,7 +209,7 @@ class System {
 
   // Map structure that stores the pointers to all KeyFrames and MapPoints.
   // Map* mpMap;
-  Atlas* mpAtlas;
+  Atlas* atlas_;
 
   // Tracker. It receives a frame and computes the associated camera pose.
   // It also decides when to insert a new keyframe, create some new MapPoints
@@ -228,7 +228,7 @@ class System {
   // The viewer draws the map and the current camera pose. It uses Pangolin.
   Viewer* mpViewer;
 
-  FrameDrawer* mpFrameDrawer;
+  FrameDrawer* frame_drawer_;
   MapDrawer* mpMapDrawer;
 
   // System threads: Local Mapping, Loop Closing, Viewer.

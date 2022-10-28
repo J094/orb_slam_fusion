@@ -41,7 +41,7 @@ class Atlas;
 class LocalMapping {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  LocalMapping(System* pSys, Atlas* pAtlas, const float bMonocular,
+  LocalMapping(System* sys, Atlas* atlas, const float bMonocular,
                bool bInertial, const string& _strSeqName = std::string());
 
   void SetLoopCloser(LoopClosing* pLoopCloser);
@@ -137,7 +137,7 @@ class LocalMapping {
   bool mbFinished;
   std::mutex mMutexFinish;
 
-  Atlas* mpAtlas;
+  Atlas* atlas_;
 
   LoopClosing* mpLoopCloser;
   Tracking* mpTracker;
