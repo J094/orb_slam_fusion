@@ -51,7 +51,7 @@ function print_usage() {
   echo "arch_type: specify architecture type, you can use \"x86\" or \"aarch64\""
 }
 
-tar -zxvf vocabulary/ORBvoc.txt.tar.gz
+tar -zxvf vocabulary/ORBvoc.txt.tar.gz -C vocabulary/
 
 print_usage
 

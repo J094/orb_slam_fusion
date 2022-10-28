@@ -187,15 +187,6 @@ int main(int argc, char **argv) {
         std::chrono::monotonic_clock::now();
 #endif
 
-#ifdef REGISTER_TIMES
-    t_track =
-        t_rect + t_resize +
-        std::chrono::duration_cast<std::chrono::duration<double, std::milli> >(
-            t2 - t1)
-            .count();
-    SLAM.InsertTrackTime(t_track);
-#endif
-
     double ttrack =
         std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1)
             .count();

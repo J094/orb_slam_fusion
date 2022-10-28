@@ -536,8 +536,9 @@ void MLPnPsolver::computePose(const bearingVectors_t &f, const points_t &p,
     tmp.col(0) = tmp.col(1).cross(tmp.col(2));
     tmp.transposeInPlace();
 
+    //BUG: Take row instead of col
     double scale =
-        1.0 / std::sqrt(std::abs(tmp.col(1).norm() * tmp.col(2).norm()));
+        1.0 / std::sqrt(std::abs(tmp.row(1).norm() * tmp.row(2).norm()));
     // find best rotation matrix in frobenius sense
     Eigen::JacobiSVD<Eigen::MatrixXd> svd_R_frob(
         tmp, Eigen::ComputeFullU | Eigen::ComputeFullV);

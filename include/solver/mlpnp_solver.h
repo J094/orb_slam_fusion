@@ -49,8 +49,8 @@
  * SUCH DAMAGE.                                                               *
  ******************************************************************************/
 
-#ifndef ORB_SLAM3_MLPNPSOLVER_H
-#define ORB_SLAM3_MLPNPSOLVER_H
+#ifndef ORB_SLAM_FUSION_MLPNPSOLVER_H
+#define ORB_SLAM_FUSION_MLPNPSOLVER_H
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -243,4 +243,4 @@ class MLPnPsolver {
 
 }  // namespace ORB_SLAM_FUSION
 
-#endif  // ORB_SLAM3_MLPNPSOLVER_H
+#endif  // ORB_SLAM_FUSION_MLPNPSOLVER_H

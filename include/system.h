@@ -191,12 +191,6 @@ class System {
 
   float GetImageScale();
 
-#ifdef REGISTER_TIMES
-  void InsertRectTime(double& time);
-  void InsertResizeTime(double& time);
-  void InsertTrackTime(double& time);
-#endif
-
  private:
   void SaveAtlas(int type);
   bool LoadAtlas(int type);

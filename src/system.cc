@@ -548,9 +548,6 @@ void System::Shutdown() {
   // if(mpViewer)
   //     pangolin::BindToContext("ORB-SLAM2: Map Viewer");
 
-#ifdef REGISTER_TIMES
-  mpTracker->PrintTimeStats();
-#endif
 }
 
 bool System::isShutDown() {
@@ -1390,20 +1387,6 @@ void System::ChangeDataset() {
 }
 
 float System::GetImageScale() { return mpTracker->GetImageScale(); }
-
-#ifdef REGISTER_TIMES
-void System::InsertRectTime(double& time) {
-  mpTracker->vdRectStereo_ms.push_back(time);
-}
-
-void System::InsertResizeTime(double& time) {
-  mpTracker->vdResizeImage_ms.push_back(time);
-}
-
-void System::InsertTrackTime(double& time) {
-  mpTracker->vdTrackTotal_ms.push_back(time);
-}
-#endif
 
 void System::SaveAtlas(int type) {
   if (!mStrSaveAtlasToFile.empty()) {

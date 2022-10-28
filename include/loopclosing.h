@@ -82,36 +82,6 @@ class LoopClosing {
 
   Viewer* mpViewer;
 
-#ifdef REGISTER_TIMES
-
-  vector<double> vdDataQuery_ms;
-  vector<double> vdEstSim3_ms;
-  vector<double> vdPRTotal_ms;
-
-  vector<double> vdMergeMaps_ms;
-  vector<double> vdWeldingBA_ms;
-  vector<double> vdMergeOptEss_ms;
-  vector<double> vdMergeTotal_ms;
-  vector<int> vnMergeKFs;
-  vector<int> vnMergeMPs;
-  int nMerges;
-
-  vector<double> vdLoopFusion_ms;
-  vector<double> vdLoopOptEss_ms;
-  vector<double> vdLoopTotal_ms;
-  vector<int> vnLoopKFs;
-  int nLoop;
-
-  vector<double> vdGBA_ms;
-  vector<double> vdUpdateMap_ms;
-  vector<double> vdFGBATotal_ms;
-  vector<int> vnGBAKFs;
-  vector<int> vnGBAMPs;
-  int nFGBA_exec;
-  int nFGBA_abort;
-
-#endif
-
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
  protected:

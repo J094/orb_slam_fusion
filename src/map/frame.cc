@@ -54,12 +54,7 @@ Frame::Frame()
       mbIsSet(false),
       mbImuPreintegrated(false),
       mbHasPose(false),
-      mbHasVelocity(false) {
-#ifdef REGISTER_TIMES
-  mTimeStereoMatch = 0;
-  mTimeORB_Ext = 0;
-#endif
-}
+      mbHasVelocity(false) {}
 
 // Copy Constructor
 Frame::Frame(const Frame &frame)
@@ -139,11 +134,6 @@ Frame::Frame(const Frame &frame)
 
   mmProjectPoints = frame.mmProjectPoints;
   mmMatchedInImage = frame.mmMatchedInImage;
-
-#ifdef REGISTER_TIMES
-  mTimeStereoMatch = frame.mTimeStereoMatch;
-  mTimeORB_Ext = frame.mTimeORB_Ext;
-#endif
 }
 
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
@@ -186,43 +176,17 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
-#endif
   thread threadLeft(&Frame::ExtractORB, this, 0, imLeft, 0, 0);
   thread threadRight(&Frame::ExtractORB, this, 1, imRight, 0, 0);
   threadLeft.join();
   threadRight.join();
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
-
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
-#endif
 
   N = mvKeys.size();
   if (mvKeys.empty()) return;
 
   UndistortKeyPoints();
 
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartStereoMatches =
-      std::chrono::steady_clock::now();
-#endif
   ComputeStereoMatches();
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndStereoMatches =
-      std::chrono::steady_clock::now();
-
-  mTimeStereoMatch =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndStereoMatches - time_StartStereoMatches)
-          .count();
-#endif
 
   mvpMapPoints = vector<MapPoint *>(N, static_cast<MapPoint *>(NULL));
   mvbOutlier = vector<bool>(N, false);
@@ -310,20 +274,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
   mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
-#endif
   ExtractORB(0, imGray, 0, 0);
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
-
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
-#endif
 
   N = mvKeys.size();
 
@@ -420,20 +371,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
   mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
-#endif
   ExtractORB(0, imGray, 0, 1000);
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
-
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
-#endif
 
   N = mvKeys.size();
   if (mvKeys.empty()) return;
@@ -1135,10 +1073,6 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   mvInvLevelSigma2 = mpORBextractorLeft->GetInverseScaleSigmaSquares();
 
   // ORB extraction
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartExtORB =
-      std::chrono::steady_clock::now();
-#endif
   thread threadLeft(&Frame::ExtractORB, this, 0, imLeft,
                     static_cast<KannalaBrandt8 *>(mpCamera)->mvLappingArea[0],
                     static_cast<KannalaBrandt8 *>(mpCamera)->mvLappingArea[1]);
@@ -1148,15 +1082,6 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
       static_cast<KannalaBrandt8 *>(mpCamera2)->mvLappingArea[1]);
   threadLeft.join();
   threadRight.join();
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndExtORB =
-      std::chrono::steady_clock::now();
-
-  mTimeORB_Ext =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndExtORB - time_StartExtORB)
-          .count();
-#endif
 
   Nleft = mvKeys.size();
   Nright = mvKeysRight.size();
@@ -1191,21 +1116,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   mTrl = mTlr.inverse();
   mRlr = mTlr.rotationMatrix();
   mtlr = mTlr.translation();
-
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_StartStereoMatches =
-      std::chrono::steady_clock::now();
-#endif
   ComputeStereoFishEyeMatches();
-#ifdef REGISTER_TIMES
-  std::chrono::steady_clock::time_point time_EndStereoMatches =
-      std::chrono::steady_clock::now();
-
-  mTimeStereoMatch =
-      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-          time_EndStereoMatches - time_StartStereoMatches)
-          .count();
-#endif
 
   // Put all descriptors in the same matrix
   cv::vconcat(mDescriptors, mDescriptorsRight, mDescriptors);

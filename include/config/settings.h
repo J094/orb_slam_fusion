@@ -19,8 +19,8 @@
  * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ORB_SLAM3_SETTINGS_H
-#define ORB_SLAM3_SETTINGS_H
+#ifndef ORB_SLAM_FUSION_SETTINGS_H
+#define ORB_SLAM_FUSION_SETTINGS_H
 
 // Flag to activate the measurement of time in each process (track,localmap,
 // place recognition).
@@ -237,4 +237,4 @@ class Settings {
 };
 };  // namespace ORB_SLAM_FUSION
 
-#endif  // ORB_SLAM3_SETTINGS_H
+#endif  // ORB_SLAM_FUSION_SETTINGS_H
