@@ -39,47 +39,47 @@ class KannalaBrandt8 : public GeometricCamera {
 
  public:
   KannalaBrandt8() : precision(1e-6) {
-    mvParameters.resize(8);
-    mnId = nNextId++;
-    mnType = kCamFisheye;
+    params_.resize(8);
+    id_ = next_id_++;
+    type_ = kCamFisheye;
   }
   KannalaBrandt8(const std::vector<float> _vParameters)
       : GeometricCamera(_vParameters),
         precision(1e-6),
         mvLappingArea(2, 0),
         tvr(nullptr) {
-    assert(mvParameters.size() == 8);
-    mnId = nNextId++;
-    mnType = kCamFisheye;
+    assert(params_.size() == 8);
+    id_ = next_id_++;
+    type_ = kCamFisheye;
   }
 
   KannalaBrandt8(const std::vector<float> _vParameters, const float _precision)
       : GeometricCamera(_vParameters),
         precision(_precision),
         mvLappingArea(2, 0) {
-    assert(mvParameters.size() == 8);
-    mnId = nNextId++;
-    mnType = kCamFisheye;
+    assert(params_.size() == 8);
+    id_ = next_id_++;
+    type_ = kCamFisheye;
   }
   KannalaBrandt8(KannalaBrandt8* pKannala)
-      : GeometricCamera(pKannala->mvParameters),
+      : GeometricCamera(pKannala->params_),
         precision(pKannala->precision),
         mvLappingArea(2, 0),
         tvr(nullptr) {
-    assert(mvParameters.size() == 8);
-    mnId = nNextId++;
-    mnType = kCamFisheye;
+    assert(params_.size() == 8);
+    id_ = next_id_++;
+    type_ = kCamFisheye;
   }
 
-  cv::Point2f project(const cv::Point3f& p3D);
-  Eigen::Vector2d project(const Eigen::Vector3d& v3D);
-  Eigen::Vector2f project(const Eigen::Vector3f& v3D);
-  Eigen::Vector2f projectMat(const cv::Point3f& p3D);
+  cv::Point2f Project(const cv::Point3f& p3d_cv);
+  Eigen::Vector2d Project(const Eigen::Vector3d& p3d_eig);
+  Eigen::Vector2f Project(const Eigen::Vector3f& p3d_eig);
+  Eigen::Vector2f ProjectMat(const cv::Point3f& p3d_cv);
 
-  float uncertainty2(const Eigen::Matrix<double, 2, 1>& p2D);
+  float Uncertainty2(const Eigen::Matrix<double, 2, 1>& p2d_eig);
 
-  Eigen::Vector3f unprojectEig(const cv::Point2f& p2D);
-  cv::Point3f unproject(const cv::Point2f& p2D);
+  Eigen::Vector3f UnprojectEig(const cv::Point2f& p2d_cv);
+  cv::Point3f Unproject(const cv::Point2f& p2d_cv);
 
   Eigen::Matrix<double, 2, 3> projectJac(const Eigen::Vector3d& v3D);
 

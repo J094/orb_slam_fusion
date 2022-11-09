@@ -25,7 +25,7 @@
 
 namespace ORB_SLAM_FUSION {
 
-long unsigned int Map::nNextId = 0;
+long unsigned int Map::next_id_ = 0;
 
 Map::Map()
     : mnMaxKFid(0),
@@ -41,7 +41,7 @@ Map::Map()
       mbIsInertial(false),
       mbIMU_BA1(false),
       mbIMU_BA2(false) {
-  mnId = nNextId++;
+  id_ = next_id_++;
   mThumbnail = static_cast<GLubyte*>(NULL);
 }
 
@@ -60,7 +60,7 @@ Map::Map(int initKFid)
       mbIsInertial(false),
       mbIMU_BA1(false),
       mbIMU_BA2(false) {
-  mnId = nNextId++;
+  id_ = next_id_++;
   mThumbnail = static_cast<GLubyte*>(NULL);
 }
 
@@ -81,16 +81,16 @@ Map::~Map() {
 void Map::AddKeyFrame(KeyFrame* pKF) {
   unique_lock<mutex> lock(mMutexMap);
   if (mspKeyFrames.empty()) {
-    cout << "First KF:" << pKF->mnId << "; Map init KF:" << mnInitKFid << endl;
-    mnInitKFid = pKF->mnId;
+    cout << "First KF:" << pKF->id_ << "; Map init KF:" << mnInitKFid << endl;
+    mnInitKFid = pKF->id_;
     mpKFinitial = pKF;
     mpKFlowerID = pKF;
   }
   mspKeyFrames.insert(pKF);
-  if (pKF->mnId > mnMaxKFid) {
-    mnMaxKFid = pKF->mnId;
+  if (pKF->id_ > mnMaxKFid) {
+    mnMaxKFid = pKF->id_;
   }
-  if (pKF->mnId < mpKFlowerID->mnId) {
+  if (pKF->id_ < mpKFlowerID->id_) {
     mpKFlowerID = pKF;
   }
 }
@@ -122,7 +122,7 @@ void Map::EraseKeyFrame(KeyFrame* pKF) {
   unique_lock<mutex> lock(mMutexMap);
   mspKeyFrames.erase(pKF);
   if (mspKeyFrames.size() > 0) {
-    if (pKF->mnId == mpKFlowerID->mnId) {
+    if (pKF->id_ == mpKFlowerID->id_) {
       vector<KeyFrame*> vpKFs =
           vector<KeyFrame*>(mspKeyFrames.begin(), mspKeyFrames.end());
       sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
@@ -176,7 +176,7 @@ vector<MapPoint*> Map::GetReferenceMapPoints() {
   return mvpReferenceMapPoints;
 }
 
-long unsigned int Map::GetId() { return mnId; }
+long unsigned int Map::GetId() { return id_; }
 long unsigned int Map::GetInitKFid() {
   unique_lock<mutex> lock(mMutexMap);
   return mnInitKFid;
@@ -289,12 +289,12 @@ bool Map::GetIniertialBA2() {
   return mbIMU_BA2;
 }
 
-void Map::ChangeId(long unsigned int nId) { mnId = nId; }
+void Map::ChangeId(long unsigned int nId) { id_ = nId; }
 
 unsigned int Map::GetLowerKFID() {
   unique_lock<mutex> lock(mMutexMap);
   if (mpKFlowerID) {
-    return mpKFlowerID->mnId;
+    return mpKFlowerID->id_;
   }
   return 0;
 }
@@ -341,7 +341,7 @@ void Map::PreSave(std::set<GeometricCamera*>& spCams) {
   mvBackupKeyFrameOriginsId.clear();
   mvBackupKeyFrameOriginsId.reserve(mvpKeyFrameOrigins.size());
   for (int i = 0, numEl = mvpKeyFrameOrigins.size(); i < numEl; ++i) {
-    mvBackupKeyFrameOriginsId.push_back(mvpKeyFrameOrigins[i]->mnId);
+    mvBackupKeyFrameOriginsId.push_back(mvpKeyFrameOrigins[i]->id_);
   }
 
   // Backup of MapPoints
@@ -364,12 +364,12 @@ void Map::PreSave(std::set<GeometricCamera*>& spCams) {
 
   mnBackupKFinitialID = -1;
   if (mpKFinitial) {
-    mnBackupKFinitialID = mpKFinitial->mnId;
+    mnBackupKFinitialID = mpKFinitial->id_;
   }
 
   mnBackupKFlowerID = -1;
   if (mpKFlowerID) {
-    mnBackupKFlowerID = mpKFlowerID->mnId;
+    mnBackupKFlowerID = mpKFlowerID->id_;
   }
 }
 
@@ -388,7 +388,7 @@ void Map::PostLoad(
     if (!pMPi || pMPi->isBad()) continue;
 
     pMPi->UpdateMap(this);
-    mpMapPointId[pMPi->mnId] = pMPi;
+    mpMapPointId[pMPi->id_] = pMPi;
   }
 
   map<long unsigned int, KeyFrame*> mpKeyFrameId;
@@ -398,7 +398,7 @@ void Map::PostLoad(
     pKFi->UpdateMap(this);
     pKFi->SetORBVocabulary(pORBVoc);
     pKFi->SetKeyFrameDatabase(kf_database);
-    mpKeyFrameId[pKFi->mnId] = pKFi;
+    mpKeyFrameId[pKFi->id_] = pKFi;
   }
 
   // References reconstruction between different instances

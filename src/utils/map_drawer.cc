@@ -193,12 +193,12 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,
         glColor3f(1.0f, 0.0f, 0.0f);
         glBegin(GL_LINES);
       } else {
-        // cout << "Child KF: " << vpKFs[i]->mnId << endl;
+        // cout << "Child KF: " << vpKFs[i]->id_ << endl;
         glLineWidth(mKeyFrameLineWidth);
         if (bDrawOptLba) {
-          if (sOptKFs.find(pKF->mnId) != sOptKFs.end()) {
+          if (sOptKFs.find(pKF->id_) != sOptKFs.end()) {
             glColor3f(0.0f, 1.0f, 0.0f);  // Green -> Opt KFs
-          } else if (sFixedKFs.find(pKF->mnId) != sFixedKFs.end()) {
+          } else if (sFixedKFs.find(pKF->id_) != sFixedKFs.end()) {
             glColor3f(1.0f, 0.0f, 0.0f);  // Red -> Fixed KFs
           } else {
             glColor3f(0.0f, 0.0f, 1.0f);  // Basic color
@@ -251,7 +251,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,
         for (vector<KeyFrame *>::const_iterator vit = vCovKFs.begin(),
                                                 vend = vCovKFs.end();
              vit != vend; vit++) {
-          if ((*vit)->mnId < vpKFs[i]->mnId) continue;
+          if ((*vit)->id_ < vpKFs[i]->id_) continue;
           Eigen::Vector3f Ow2 = (*vit)->GetCameraCenter();
           glVertex3f(Ow(0), Ow(1), Ow(2));
           glVertex3f(Ow2(0), Ow2(1), Ow2(2));
@@ -271,7 +271,7 @@ void MapDrawer::DrawKeyFrames(const bool bDrawKF, const bool bDrawGraph,
       for (set<KeyFrame *>::iterator sit = sLoopKFs.begin(),
                                      send = sLoopKFs.end();
            sit != send; sit++) {
-        if ((*sit)->mnId < vpKFs[i]->mnId) continue;
+        if ((*sit)->id_ < vpKFs[i]->id_) continue;
         Eigen::Vector3f Owl = (*sit)->GetCameraCenter();
         glVertex3f(Ow(0), Ow(1), Ow(2));
         glVertex3f(Owl(0), Owl(1), Owl(2));

@@ -44,7 +44,7 @@ class MapPoint {
   friend class boost::serialization::access;
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
-    ar& mnId;
+    ar& id_;
     ar& mnFirstKFid;
     ar& mnFirstFrame;
     ar& nObs;
@@ -157,8 +157,8 @@ class MapPoint {
                 map<long unsigned int, MapPoint*>& mpMPid);
 
  public:
-  long unsigned int mnId;
-  static long unsigned int nNextId;
+  long unsigned int id_;
+  static long unsigned int next_id_;
   long int mnFirstKFid;
   long int mnFirstFrame;
   int nObs;

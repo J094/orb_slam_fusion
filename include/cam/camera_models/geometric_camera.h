@@ -44,74 +44,72 @@ class GeometricCamera {
 
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
-    ar& mnId;
-    ar& mnType;
-    ar& mvParameters;
+    ar& id_;
+    ar& type_;
+    ar& params_;
   }
 
  public:
   GeometricCamera() {}
-  GeometricCamera(const std::vector<float>& _vParameters)
-      : mvParameters(_vParameters) {}
+  GeometricCamera(const std::vector<float>& params) : params_(params) {}
   ~GeometricCamera() {}
 
-  virtual cv::Point2f project(const cv::Point3f& p3D) = 0;
-  virtual Eigen::Vector2d project(const Eigen::Vector3d& v3D) = 0;
-  virtual Eigen::Vector2f project(const Eigen::Vector3f& v3D) = 0;
-  virtual Eigen::Vector2f projectMat(const cv::Point3f& p3D) = 0;
+  virtual cv::Point2f Project(const cv::Point3f& p3d_cv) = 0;
+  virtual Eigen::Vector2d Project(const Eigen::Vector3d& p3d_eig) = 0;
+  virtual Eigen::Vector2f Project(const Eigen::Vector3f& p3d_eig) = 0;
+  virtual Eigen::Vector2f ProjectMat(const cv::Point3f& p3d_cv) = 0;
 
-  virtual float uncertainty2(const Eigen::Matrix<double, 2, 1>& p2D) = 0;
+  virtual float Uncertainty2(const Eigen::Matrix<double, 2, 1>& p2d_eig) = 0;
 
-  virtual Eigen::Vector3f unprojectEig(const cv::Point2f& p2D) = 0;
-  virtual cv::Point3f unproject(const cv::Point2f& p2D) = 0;
+  virtual Eigen::Vector3f UnprojectEig(const cv::Point2f& p2d_cv) = 0;
+  virtual cv::Point3f Unproject(const cv::Point2f& p2d_cv) = 0;
 
-  virtual Eigen::Matrix<double, 2, 3> projectJac(
-      const Eigen::Vector3d& v3D) = 0;
+  virtual Eigen::Matrix<double, 2, 3> ProjectJac(
+      const Eigen::Vector3d& p3d_eig) = 0;
 
-  virtual bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1,
-                                       const std::vector<cv::KeyPoint>& vKeys2,
-                                       const std::vector<int>& vMatches12,
-                                       Sophus::SE3f& T21,
-                                       std::vector<cv::Point3f>& vP3D,
-                                       std::vector<bool>& vbTriangulated) = 0;
+  virtual bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& kps_1,
+                                       const std::vector<cv::KeyPoint>& kps_2,
+                                       const std::vector<int>& matches12,
+                                       Sophus::SE3f& T21_so,
+                                       std::vector<cv::Point3f>& p3ds_cv,
+                                       std::vector<bool>& is_triangulated) = 0;
 
-  virtual cv::Mat toK() = 0;
-  virtual Eigen::Matrix3f toK_() = 0;
+  virtual cv::Mat ToKCv() = 0;
+  virtual Eigen::Matrix3f ToKEig() = 0;
 
-  virtual bool epipolarConstrain(GeometricCamera* otherCamera,
-                                 const cv::KeyPoint& kp1,
-                                 const cv::KeyPoint& kp2,
-                                 const Eigen::Matrix3f& R12,
-                                 const Eigen::Vector3f& t12,
-                                 const float sigmaLevel, const float unc) = 0;
+  virtual bool EpipolarConstrain(GeometricCamera* other_cam,
+                                 const cv::KeyPoint& kp_1,
+                                 const cv::KeyPoint& kp_2,
+                                 const Eigen::Matrix3f& R12_eig,
+                                 const Eigen::Vector3f& t12_eig,
+                                 const float sigma_lev, const float unc) = 0;
 
-  float getParameter(const int i) { return mvParameters[i]; }
-  void setParameter(const float p, const size_t i) { mvParameters[i] = p; }
+  float GetParameter(const size_t i) { return params_[i]; }
+  void SetParameter(const float p, const size_t i) { params_[i] = p; }
 
-  size_t size() { return mvParameters.size(); }
+  size_t Size() { return params_.size(); }
 
-  virtual bool matchAndtriangulate(const cv::KeyPoint& kp1,
-                                   const cv::KeyPoint& kp2,
-                                   GeometricCamera* pOther, Sophus::SE3f& Tcw1,
-                                   Sophus::SE3f& Tcw2, const float sigmaLevel1,
-                                   const float sigmaLevel2,
-                                   Eigen::Vector3f& x3Dtriangulated) = 0;
+  virtual bool MatchAndTriangulate(
+      const cv::KeyPoint& kp_1, const cv::KeyPoint& kp_2,
+      GeometricCamera* outher_cam, Sophus::SE3f& Tcw_1_so,
+      Sophus::SE3f& Tcw_2_so, const float sigma_lev_1, const float sigma_lev_2,
+      Eigen::Vector3f& p3d_eig) = 0;
 
-  unsigned int GetId() { return mnId; }
+  unsigned int GetId() { return id_; }
 
-  unsigned int GetType() { return mnType; }
+  unsigned int GetType() { return type_; }
 
   const static unsigned int kCamPinhole = 0;
   const static unsigned int kCamFisheye = 1;
 
-  static long unsigned int nNextId;
+  static long unsigned int next_id_;
 
  protected:
-  std::vector<float> mvParameters;
+  std::vector<float> params_;
 
-  unsigned int mnId;
+  unsigned int id_;
 
-  unsigned int mnType;
+  unsigned int type_;
 };
 }  // namespace ORB_SLAM_FUSION
 

@@ -61,11 +61,11 @@ class Atlas {
     ar& mvpBackupMaps;
     ar& mvpCameras;
     // Need to save/load the static Id from Frame, KeyFrame, MapPoint and Map
-    ar& Map::nNextId;
-    ar& Frame::nNextId;
-    ar& KeyFrame::nNextId;
-    ar& MapPoint::nNextId;
-    ar& GeometricCamera::nNextId;
+    ar& Map::next_id_;
+    ar& Frame::next_id_;
+    ar& KeyFrame::next_id_;
+    ar& MapPoint::next_id_;
+    ar& GeometricCamera::next_id_;
     ar& mnLastInitKFidMap;
   }
 

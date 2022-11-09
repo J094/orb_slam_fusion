@@ -369,7 +369,7 @@ void FrameDrawer::Update(Tracking *pTracker) {
           else
             mvbVO[i] = true;
 
-          mmMatchedInImage[pMP->mnId] = mvCurrentKeys[i].pt;
+          mmMatchedInImage[pMP->id_] = mvCurrentKeys[i].pt;
         } else {
           mvpOutlierMPs.push_back(pMP);
           mvOutlierKeys.push_back(mvCurrentKeys[i]);

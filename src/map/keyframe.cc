@@ -28,7 +28,7 @@
 
 namespace ORB_SLAM_FUSION {
 
-long unsigned int KeyFrame::nNextId = 0;
+long unsigned int KeyFrame::next_id_ = 0;
 
 KeyFrame::KeyFrame()
     : mnFrameId(0),
@@ -93,7 +93,7 @@ KeyFrame::KeyFrame()
 
 KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *kf_database)
     : bImu(pMap->isImuInitialized()),
-      mnFrameId(F.mnId),
+      mnFrameId(F.id_),
       timestamp_(F.timestamp_),
       mnGridCols(FRAME_GRID_COLS),
       mnGridRows(FRAME_GRID_ROWS),
@@ -170,7 +170,7 @@ KeyFrame::KeyFrame(Frame &F, Map *pMap, KeyFrameDatabase *kf_database)
       mTrl(F.GetRelativePoseTrl()),
       mnNumberOfOpt(0),
       mbHasVelocity(false) {
-  mnId = nNextId++;
+  id_ = next_id_++;
 
   mGrid.resize(mnGridCols);
   if (F.Nleft != -1) mGridRight.resize(mnGridCols);
@@ -465,7 +465,7 @@ void KeyFrame::UpdateConnections(bool upParent) {
     for (map<KeyFrame *, tuple<int, int>>::iterator mit = observations.begin(),
                                                     mend = observations.end();
          mit != mend; mit++) {
-      if (mit->first->mnId == mnId || mit->first->isBad() ||
+      if (mit->first->id_ == id_ || mit->first->isBad() ||
           mit->first->GetMap() != mpMap)
         continue;
       KFcounter[mit->first]++;
@@ -484,12 +484,12 @@ void KeyFrame::UpdateConnections(bool upParent) {
 
   vector<pair<int, KeyFrame *>> vPairs;
   vPairs.reserve(KFcounter.size());
-  if (!upParent) cout << "UPDATE_CONN: current KF " << mnId << endl;
+  if (!upParent) cout << "UPDATE_CONN: current KF " << id_ << endl;
   for (map<KeyFrame *, int>::iterator mit = KFcounter.begin(),
                                       mend = KFcounter.end();
        mit != mend; mit++) {
     if (!upParent)
-      cout << "  UPDATE_CONN: KF " << mit->first->mnId
+      cout << "  UPDATE_CONN: KF " << mit->first->id_
            << " ; num matches: " << mit->second << endl;
     if (mit->second > nmax) {
       nmax = mit->second;
@@ -521,7 +521,7 @@ void KeyFrame::UpdateConnections(bool upParent) {
     mvpOrderedConnectedKeyFrames = vector<KeyFrame *>(lKFs.begin(), lKFs.end());
     mvOrderedWeights = vector<int>(lWs.begin(), lWs.end());
 
-    if (mbFirstConnection && mnId != mpMap->GetInitKFid()) {
+    if (mbFirstConnection && id_ != mpMap->GetInitKFid()) {
       mpParent = mvpOrderedConnectedKeyFrames.front();
       mpParent->AddChild(this);
       mbFirstConnection = false;
@@ -614,7 +614,7 @@ void KeyFrame::SetErase() {
 void KeyFrame::SetBadFlag() {
   {
     unique_lock<mutex> lock(mMutexConnections);
-    if (mnId == mpMap->GetInitKFid()) {
+    if (id_ == mpMap->GetInitKFid()) {
       return;
     } else if (mbNotErase) {
       mbToBeErased = true;
@@ -667,7 +667,7 @@ void KeyFrame::SetBadFlag() {
           for (set<KeyFrame *>::iterator spcit = sParentCandidates.begin(),
                                          spcend = sParentCandidates.end();
                spcit != spcend; spcit++) {
-            if (vpConnected[i]->mnId == (*spcit)->mnId) {
+            if (vpConnected[i]->id_ == (*spcit)->id_) {
               int w = pKF->GetWeight(vpConnected[i]);
               if (w > max) {
                 pC = pKF;
@@ -864,7 +864,7 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
   for (int i = 0; i < N; ++i) {
     if (mvpMapPoints[i] && spMP.find(mvpMapPoints[i]) !=
                                spMP.end())  // Checks if the element is not null
-      mvBackupMapPointsId.push_back(mvpMapPoints[i]->mnId);
+      mvBackupMapPointsId.push_back(mvpMapPoints[i]->id_);
     else  // If the element is null his value is -1 because all the id are
           // positives
       mvBackupMapPointsId.push_back(-1);
@@ -876,20 +876,20 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
            end = mConnectedKeyFrameWeights.end();
        it != end; ++it) {
     if (spKF.find(it->first) != spKF.end())
-      mBackupConnectedKeyFrameIdWeights[it->first->mnId] = it->second;
+      mBackupConnectedKeyFrameIdWeights[it->first->id_] = it->second;
   }
 
   // Save the parent id
   mBackupParentId = -1;
   if (mpParent && spKF.find(mpParent) != spKF.end())
-    mBackupParentId = mpParent->mnId;
+    mBackupParentId = mpParent->id_;
 
   // Save the id of the childrens KF
   mvBackupChildrensId.clear();
   mvBackupChildrensId.reserve(mspChildrens.size());
   for (KeyFrame *pKFi : mspChildrens) {
     if (spKF.find(pKFi) != spKF.end())
-      mvBackupChildrensId.push_back(pKFi->mnId);
+      mvBackupChildrensId.push_back(pKFi->id_);
   }
 
   // Save the id of the loop edge KF
@@ -897,7 +897,7 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
   mvBackupLoopEdgesId.reserve(mspLoopEdges.size());
   for (KeyFrame *pKFi : mspLoopEdges) {
     if (spKF.find(pKFi) != spKF.end())
-      mvBackupLoopEdgesId.push_back(pKFi->mnId);
+      mvBackupLoopEdgesId.push_back(pKFi->id_);
   }
 
   // Save the id of the merge edge KF
@@ -905,7 +905,7 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
   mvBackupMergeEdgesId.reserve(mspMergeEdges.size());
   for (KeyFrame *pKFi : mspMergeEdges) {
     if (spKF.find(pKFi) != spKF.end())
-      mvBackupMergeEdgesId.push_back(pKFi->mnId);
+      mvBackupMergeEdgesId.push_back(pKFi->id_);
   }
 
   // Camera data
@@ -920,11 +920,11 @@ void KeyFrame::PreSave(set<KeyFrame *> &spKF, set<MapPoint *> &spMP,
   // Inertial data
   mBackupPrevKFId = -1;
   if (mPrevKF && spKF.find(mPrevKF) != spKF.end())
-    mBackupPrevKFId = mPrevKF->mnId;
+    mBackupPrevKFId = mPrevKF->id_;
 
   mBackupNextKFId = -1;
   if (mNextKF && spKF.find(mNextKF) != spKF.end())
-    mBackupNextKFId = mNextKF->mnId;
+    mBackupNextKFId = mNextKF->id_;
 
   if (mpImuPreintegrated) mBackupImuPreintegrated.CopyFrom(mpImuPreintegrated);
 }
@@ -994,7 +994,7 @@ void KeyFrame::PostLoad(map<long unsigned int, KeyFrame *> &mpKFid,
   if (mnBackupIdCamera >= 0) {
     cam_ = mpCamId[mnBackupIdCamera];
   } else {
-    cout << "ERROR: There is not a main camera in KF " << mnId << endl;
+    cout << "ERROR: There is not a main camera in KF " << id_ << endl;
   }
   if (mnBackupIdCamera2 >= 0) {
     cam2_ = mpCamId[mnBackupIdCamera2];

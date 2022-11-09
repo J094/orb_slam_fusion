@@ -43,7 +43,7 @@ class Map {
 
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
-    ar& mnId;
+    ar& id_;
     ar& mnInitKFid;
     ar& mnMaxKFid;
     ar& mnBigChangeIdx;
@@ -156,14 +156,14 @@ class Map {
   static const int THUMB_WIDTH = 512;
   static const int THUMB_HEIGHT = 512;
 
-  static long unsigned int nNextId;
+  static long unsigned int next_id_;
 
   // DEBUG: show KFs which are used in LBA
   std::set<long unsigned int> msOptKFs;
   std::set<long unsigned int> msFixedKFs;
 
  protected:
-  long unsigned int mnId;
+  long unsigned int id_;
 
   std::set<MapPoint*> mspMapPoints;
   std::set<KeyFrame*> mspKeyFrames;

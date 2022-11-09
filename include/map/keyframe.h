@@ -52,7 +52,7 @@ class KeyFrame {
 
   template <class Archive>
   void serialize(Archive& ar, const unsigned int version) {
-    ar& mnId;
+    ar& id_;
     ar& const_cast<long unsigned int&>(mnFrameId);
     ar& const_cast<double&>(timestamp_);
     // Grid
@@ -276,7 +276,7 @@ class KeyFrame {
   static bool weightComp(int a, int b) { return a > b; }
 
   static bool lId(KeyFrame* pKF1, KeyFrame* pKF2) {
-    return pKF1->mnId < pKF2->mnId;
+    return pKF1->id_ < pKF2->id_;
   }
 
   Map* GetMap();
@@ -307,8 +307,8 @@ class KeyFrame {
   // The following variables are accesed from only 1 thread or never change (no
   // mutex needed).
  public:
-  static long unsigned int nNextId;
-  long unsigned int mnId;
+  static long unsigned int next_id_;
+  long unsigned int id_;
   const long unsigned int mnFrameId;
 
   const double timestamp_;

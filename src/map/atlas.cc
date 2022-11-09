@@ -52,7 +52,7 @@ Atlas::~Atlas() {
 
 void Atlas::CreateNewMap() {
   unique_lock<mutex> lock(mMutexAtlas);
-  cout << "Creation of new map with id: " << Map::nNextId << endl;
+  cout << "Creation of new map with id: " << Map::next_id_ << endl;
   if (mpCurrentMap) {
     if (!mspMaps.empty() && mnLastInitKFidMap < mpCurrentMap->GetMaxKFid())
       mnLastInitKFidMap = mpCurrentMap->GetMaxKFid() +
@@ -338,7 +338,7 @@ map<long unsigned int, KeyFrame*> Atlas::GetAtlasKeyframes() {
     vector<KeyFrame*> vpKFs_Mi = pMap_i->GetAllKeyFrames();
 
     for (KeyFrame* pKF_j_Mi : vpKFs_Mi) {
-      mpIdKFs[pKF_j_Mi->mnId] = pKF_j_Mi;
+      mpIdKFs[pKF_j_Mi->id_] = pKF_j_Mi;
     }
   }
 

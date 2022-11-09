@@ -711,7 +711,7 @@ void System::SaveTrajectoryEuRoC(const string& filename) {
     if (*lbL) continue;
 
     KeyFrame* pKF = *lRit;
-    // cout << "KF: " << pKF->mnId << endl;
+    // cout << "KF: " << pKF->id_ << endl;
 
     Sophus::SE3f Trw;
 
@@ -725,7 +725,7 @@ void System::SaveTrajectoryEuRoC(const string& filename) {
       // cout << " 2.bad" << endl;
       Trw = Trw * pKF->mTcp;
       pKF = pKF->GetParent();
-      // cout << "--Parent KF: " << pKF->mnId << endl;
+      // cout << "--Parent KF: " << pKF->id_ << endl;
     }
 
     if (!pKF || pKF->GetMap() != pBiggerMap) {
@@ -817,7 +817,7 @@ void System::SaveTrajectoryEuRoC(const string& filename, Map* pMap) {
     if (*lbL) continue;
 
     KeyFrame* pKF = *lRit;
-    // cout << "KF: " << pKF->mnId << endl;
+    // cout << "KF: " << pKF->id_ << endl;
 
     Sophus::SE3f Trw;
 
@@ -831,7 +831,7 @@ void System::SaveTrajectoryEuRoC(const string& filename, Map* pMap) {
       // cout << " 2.bad" << endl;
       Trw = Trw * pKF->mTcp;
       pKF = pKF->GetParent();
-      // cout << "--Parent KF: " << pKF->mnId << endl;
+      // cout << "--Parent KF: " << pKF->id_ << endl;
     }
 
     if (!pKF || pKF->GetMap() != pMap) {
@@ -939,7 +939,7 @@ lT++, lbL++)
 
 
         KeyFrame* pKF = *lRit;
-        //cout << "KF: " << pKF->mnId << endl;
+        //cout << "KF: " << pKF->id_ << endl;
 
         Sophus::SE3f Trw;
 
@@ -953,7 +953,7 @@ get a suitable keyframe. if (!pKF) continue;
             //cout << " 2.bad" << endl;
             Trw = Trw * pKF->mTcp;
             pKF = pKF->GetParent();
-            //cout << "--Parent KF: " << pKF->mnId << endl;
+            //cout << "--Parent KF: " << pKF->id_ << endl;
         }
 
         if(!pKF || pKF->GetMap() != pBiggerMap)

@@ -114,10 +114,10 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF,
             pKF->GetMap())  // For consider a loop candidate it a candidate it
                             // must be in the same map
         {
-          if (pKFi->mnLoopQuery != pKF->mnId) {
+          if (pKFi->mnLoopQuery != pKF->id_) {
             pKFi->mnLoopWords = 0;
             if (!spConnectedKeyFrames.count(pKFi)) {
-              pKFi->mnLoopQuery = pKF->mnId;
+              pKFi->mnLoopQuery = pKF->id_;
               lKFsSharingWords.push_back(pKFi);
             }
           }
@@ -180,7 +180,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF,
                                      vend = vpNeighs.end();
          vit != vend; vit++) {
       KeyFrame* pKF2 = *vit;
-      if (pKF2->mnLoopQuery == pKF->mnId &&
+      if (pKF2->mnLoopQuery == pKF->id_ &&
           pKF2->mnLoopWords > minCommonWords) {
         accScore += pKF2->mLoopScore;
         if (pKF2->mLoopScore > bestScore) {
@@ -239,19 +239,19 @@ void KeyFrameDatabase::DetectCandidates(KeyFrame* pKF, float minScore,
             pKF->GetMap())  // For consider a loop candidate it a candidate it
                             // must be in the same map
         {
-          if (pKFi->mnLoopQuery != pKF->mnId) {
+          if (pKFi->mnLoopQuery != pKF->id_) {
             pKFi->mnLoopWords = 0;
             if (!spConnectedKeyFrames.count(pKFi)) {
-              pKFi->mnLoopQuery = pKF->mnId;
+              pKFi->mnLoopQuery = pKF->id_;
               lKFsSharingWordsLoop.push_back(pKFi);
             }
           }
           pKFi->mnLoopWords++;
         } else if (!pKFi->GetMap()->IsBad()) {
-          if (pKFi->mnMergeQuery != pKF->mnId) {
+          if (pKFi->mnMergeQuery != pKF->id_) {
             pKFi->mnMergeWords = 0;
             if (!spConnectedKeyFrames.count(pKFi)) {
-              pKFi->mnMergeQuery = pKF->mnId;
+              pKFi->mnMergeQuery = pKF->id_;
               lKFsSharingWordsMerge.push_back(pKFi);
             }
           }
@@ -314,7 +314,7 @@ void KeyFrameDatabase::DetectCandidates(KeyFrame* pKF, float minScore,
                                          vend = vpNeighs.end();
              vit != vend; vit++) {
           KeyFrame* pKF2 = *vit;
-          if (pKF2->mnLoopQuery == pKF->mnId &&
+          if (pKF2->mnLoopQuery == pKF->id_ &&
               pKF2->mnLoopWords > minCommonWords) {
             accScore += pKF2->mLoopScore;
             if (pKF2->mLoopScore > bestScore) {
@@ -400,7 +400,7 @@ void KeyFrameDatabase::DetectCandidates(KeyFrame* pKF, float minScore,
                                          vend = vpNeighs.end();
              vit != vend; vit++) {
           KeyFrame* pKF2 = *vit;
-          if (pKF2->mnMergeQuery == pKF->mnId &&
+          if (pKF2->mnMergeQuery == pKF->id_ &&
               pKF2->mnMergeWords > minCommonWords) {
             accScore += pKF2->mMergeScore;
             if (pKF2->mMergeScore > bestScore) {
@@ -473,9 +473,9 @@ void KeyFrameDatabase::DetectBestCandidates(KeyFrame* pKF,
         if (spConnectedKF.find(pKFi) != spConnectedKF.end()) {
           continue;
         }
-        if (pKFi->mnPlaceRecognitionQuery != pKF->mnId) {
+        if (pKFi->mnPlaceRecognitionQuery != pKF->id_) {
           pKFi->mnPlaceRecognitionWords = 0;
-          pKFi->mnPlaceRecognitionQuery = pKF->mnId;
+          pKFi->mnPlaceRecognitionQuery = pKF->id_;
           lKFsSharingWords.push_back(pKFi);
         }
         pKFi->mnPlaceRecognitionWords++;
@@ -536,7 +536,7 @@ void KeyFrameDatabase::DetectBestCandidates(KeyFrame* pKF,
                                      vend = vpNeighs.end();
          vit != vend; vit++) {
       KeyFrame* pKF2 = *vit;
-      if (pKF2->mnPlaceRecognitionQuery != pKF->mnId) continue;
+      if (pKF2->mnPlaceRecognitionQuery != pKF->id_) continue;
 
       accScore += pKF2->mPlaceRecognitionScore;
       if (pKF2->mPlaceRecognitionScore > bestScore) {
@@ -598,10 +598,10 @@ void KeyFrameDatabase::DetectNBestCandidates(KeyFrame* pKF,
            lit != lend; lit++) {
         KeyFrame* pKFi = *lit;
 
-        if (pKFi->mnPlaceRecognitionQuery != pKF->mnId) {
+        if (pKFi->mnPlaceRecognitionQuery != pKF->id_) {
           pKFi->mnPlaceRecognitionWords = 0;
           if (!spConnectedKF.count(pKFi)) {
-            pKFi->mnPlaceRecognitionQuery = pKF->mnId;
+            pKFi->mnPlaceRecognitionQuery = pKF->id_;
             lKFsSharingWords.push_back(pKFi);
           }
         }
@@ -659,7 +659,7 @@ void KeyFrameDatabase::DetectNBestCandidates(KeyFrame* pKF,
                                      vend = vpNeighs.end();
          vit != vend; vit++) {
       KeyFrame* pKF2 = *vit;
-      if (pKF2->mnPlaceRecognitionQuery != pKF->mnId) continue;
+      if (pKF2->mnPlaceRecognitionQuery != pKF->id_) continue;
 
       accScore += pKF2->mPlaceRecognitionScore;
       if (pKF2->mPlaceRecognitionScore > bestScore) {
@@ -716,9 +716,9 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame* F,
       for (list<KeyFrame*>::iterator lit = lKFs.begin(), lend = lKFs.end();
            lit != lend; lit++) {
         KeyFrame* pKFi = *lit;
-        if (pKFi->mnRelocQuery != F->mnId) {
+        if (pKFi->mnRelocQuery != F->id_) {
           pKFi->mnRelocWords = 0;
-          pKFi->mnRelocQuery = F->mnId;
+          pKFi->mnRelocQuery = F->id_;
           lKFsSharingWords.push_back(pKFi);
         }
         pKFi->mnRelocWords++;
@@ -775,7 +775,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectRelocalizationCandidates(Frame* F,
                                      vend = vpNeighs.end();
          vit != vend; vit++) {
       KeyFrame* pKF2 = *vit;
-      if (pKF2->mnRelocQuery != F->mnId) continue;
+      if (pKF2->mnRelocQuery != F->id_) continue;
 
       accScore += pKF2->mRelocScore;
       if (pKF2->mRelocScore > bestScore) {

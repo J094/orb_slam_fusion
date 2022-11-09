@@ -38,39 +38,39 @@ class Pinhole : public GeometricCamera {
 
  public:
   Pinhole() {
-    mvParameters.resize(4);
-    mnId = nNextId++;
-    mnType = kCamPinhole;
+    params_.resize(4);
+    id_ = next_id_++;
+    type_ = kCamPinhole;
   }
   Pinhole(const std::vector<float> _vParameters)
       : GeometricCamera(_vParameters), tvr(nullptr) {
-    assert(mvParameters.size() == 4);
-    mnId = nNextId++;
-    mnType = kCamPinhole;
+    assert(params_.size() == 4);
+    id_ = next_id_++;
+    type_ = kCamPinhole;
   }
 
   Pinhole(Pinhole* pPinhole)
-      : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
-    assert(mvParameters.size() == 4);
-    mnId = nNextId++;
-    mnType = kCamPinhole;
+      : GeometricCamera(pPinhole->params_), tvr(nullptr) {
+    assert(params_.size() == 4);
+    id_ = next_id_++;
+    type_ = kCamPinhole;
   }
 
   ~Pinhole() {
     if (tvr) delete tvr;
   }
 
-  cv::Point2f project(const cv::Point3f& p3D);
-  Eigen::Vector2d project(const Eigen::Vector3d& v3D);
-  Eigen::Vector2f project(const Eigen::Vector3f& v3D);
-  Eigen::Vector2f projectMat(const cv::Point3f& p3D);
+  cv::Point2f Project(const cv::Point3f& p3d_cv);
+  Eigen::Vector2d Project(const Eigen::Vector3d& p3d_eig);
+  Eigen::Vector2f Project(const Eigen::Vector3f& p3d_eig);
+  Eigen::Vector2f ProjectMat(const cv::Point3f& p3d_cv);
 
-  float uncertainty2(const Eigen::Matrix<double, 2, 1>& p2D);
+  float Uncertainty2(const Eigen::Matrix<double, 2, 1>& p2d_eig);
 
-  Eigen::Vector3f unprojectEig(const cv::Point2f& p2D);
-  cv::Point3f unproject(const cv::Point2f& p2D);
+  Eigen::Vector3f UnprojectEig(const cv::Point2f& p2d_cv);
+  cv::Point3f Unproject(const cv::Point2f& p2d_cv);
 
-  Eigen::Matrix<double, 2, 3> projectJac(const Eigen::Vector3d& v3D);
+  Eigen::Matrix<double, 2, 3> ProjectJac(const Eigen::Vector3d& p3d_eig);
 
   bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1,
                                const std::vector<cv::KeyPoint>& vKeys2,

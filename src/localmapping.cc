@@ -276,7 +276,7 @@ void LocalMapping::EmptyQueue() {
 void LocalMapping::MapPointCulling() {
   // Check Recent Added MapPoints
   list<MapPoint*>::iterator lit = mlpRecentAddedMapPoints.begin();
-  const unsigned long int nCurrentKFid = mpCurrentKeyFrame->mnId;
+  const unsigned long int nCurrentKFid = mpCurrentKeyFrame->id_;
 
   //TODO: Check, if this change is good?
   int nThObs;
@@ -627,10 +627,10 @@ void LocalMapping::SearchInNeighbors() {
                                          vend = vpNeighKFs.end();
        vit != vend; vit++) {
     KeyFrame* pKFi = *vit;
-    if (pKFi->isBad() || pKFi->mnFuseTargetForKF == mpCurrentKeyFrame->mnId)
+    if (pKFi->isBad() || pKFi->mnFuseTargetForKF == mpCurrentKeyFrame->id_)
       continue;
     vpTargetKFs.push_back(pKFi);
-    pKFi->mnFuseTargetForKF = mpCurrentKeyFrame->mnId;
+    pKFi->mnFuseTargetForKF = mpCurrentKeyFrame->id_;
   }
 
   // Add some covisible of covisible
@@ -643,11 +643,11 @@ void LocalMapping::SearchInNeighbors() {
          vit2 != vend2; vit2++) {
       KeyFrame* pKFi2 = *vit2;
       if (pKFi2->isBad() ||
-          pKFi2->mnFuseTargetForKF == mpCurrentKeyFrame->mnId ||
-          pKFi2->mnId == mpCurrentKeyFrame->mnId)
+          pKFi2->mnFuseTargetForKF == mpCurrentKeyFrame->id_ ||
+          pKFi2->id_ == mpCurrentKeyFrame->id_)
         continue;
       vpTargetKFs.push_back(pKFi2);
-      pKFi2->mnFuseTargetForKF = mpCurrentKeyFrame->mnId;
+      pKFi2->mnFuseTargetForKF = mpCurrentKeyFrame->id_;
     }
     if (mbAbortBA) break;
   }
@@ -656,12 +656,12 @@ void LocalMapping::SearchInNeighbors() {
   if (mbInertial) {
     KeyFrame* pKFi = mpCurrentKeyFrame->mPrevKF;
     while (vpTargetKFs.size() < 20 && pKFi) {
-      if (pKFi->isBad() || pKFi->mnFuseTargetForKF == mpCurrentKeyFrame->mnId) {
+      if (pKFi->isBad() || pKFi->mnFuseTargetForKF == mpCurrentKeyFrame->id_) {
         pKFi = pKFi->mPrevKF;
         continue;
       }
       vpTargetKFs.push_back(pKFi);
-      pKFi->mnFuseTargetForKF = mpCurrentKeyFrame->mnId;
+      pKFi->mnFuseTargetForKF = mpCurrentKeyFrame->id_;
       pKFi = pKFi->mPrevKF;
     }
   }
@@ -696,9 +696,9 @@ void LocalMapping::SearchInNeighbors() {
          vitMP != vendMP; vitMP++) {
       MapPoint* pMP = *vitMP;
       if (!pMP) continue;
-      if (pMP->isBad() || pMP->mnFuseCandidateForKF == mpCurrentKeyFrame->mnId)
+      if (pMP->isBad() || pMP->mnFuseCandidateForKF == mpCurrentKeyFrame->id_)
         continue;
-      pMP->mnFuseCandidateForKF = mpCurrentKeyFrame->mnId;
+      pMP->mnFuseCandidateForKF = mpCurrentKeyFrame->id_;
       vpFuseCandidates.push_back(pMP);
     }
   }
@@ -818,7 +818,7 @@ void LocalMapping::KeyFrameCulling() {
       aux_KF = aux_KF->mPrevKF;
       count++;
     }
-    last_ID = aux_KF->mnId;
+    last_ID = aux_KF->id_;
   }
 
   for (vector<KeyFrame*>::iterator vit = vpLocalKeyFrames.begin(),
@@ -827,7 +827,7 @@ void LocalMapping::KeyFrameCulling() {
     count++;
     KeyFrame* pKF = *vit;
 
-    if ((pKF->mnId == pKF->GetMap()->GetInitKFid()) || pKF->isBad()) continue;
+    if ((pKF->id_ == pKF->GetMap()->GetInitKFid()) || pKF->isBad()) continue;
     const vector<MapPoint*> vpMapPoints = pKF->GetMapPointMatches();
 
     int nObs = 3;
@@ -893,12 +893,12 @@ void LocalMapping::KeyFrameCulling() {
       if (mbInertial) {
         if (atlas_->KeyFramesInMap() <= Nd) continue;
 
-        if (pKF->mnId > (mpCurrentKeyFrame->mnId - 2)) continue;
+        if (pKF->id_ > (mpCurrentKeyFrame->id_ - 2)) continue;
 
         if (pKF->mPrevKF && pKF->mNextKF) {
           const float t = pKF->mNextKF->timestamp_ - pKF->mPrevKF->timestamp_;
 
-          if ((bInitImu && (pKF->mnId < last_ID) && t < 3.) || (t < 0.5)) {
+          if ((bInitImu && (pKF->id_ < last_ID) && t < 3.) || (t < 0.5)) {
             pKF->mNextKF->mpImuPreintegrated->MergePrevious(
                 pKF->mpImuPreintegrated);
             pKF->mNextKF->mPrevKF = pKF->mPrevKF;
@@ -1154,11 +1154,11 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
   if (bFIBA) {
     if (priorA != 0.f)
       Optimizer::FullInertialBA(atlas_->GetCurrentMap(), 100, false,
-                                mpCurrentKeyFrame->mnId, NULL, true, priorG,
+                                mpCurrentKeyFrame->id_, NULL, true, priorG,
                                 priorA);
     else
       Optimizer::FullInertialBA(atlas_->GetCurrentMap(), 100, false,
-                                mpCurrentKeyFrame->mnId, NULL, false);
+                                mpCurrentKeyFrame->id_, NULL, false);
   }
 
   std::chrono::steady_clock::time_point t5 = std::chrono::steady_clock::now();
@@ -1169,7 +1169,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
   // Get Map Mutex
   unique_lock<mutex> lock(atlas_->GetCurrentMap()->mMutexMapUpdate);
 
-  unsigned long GBAid = mpCurrentKeyFrame->mnId;
+  unsigned long GBAid = mpCurrentKeyFrame->id_;
 
   // Process keyframes in the queue
   while (CheckNewKeyFrames()) {
@@ -1219,7 +1219,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA) {
       pKF->SetVelocity(pKF->mVwbGBA);
       pKF->SetNewBias(pKF->mBiasGBA);
     } else {
-      cout << "KF " << pKF->mnId << " not set to inertial!! \n";
+      cout << "KF " << pKF->id_ << " not set to inertial!! \n";
     }
 
     lpKFtoCheck.pop_front();

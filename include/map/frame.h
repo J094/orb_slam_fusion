@@ -273,8 +273,8 @@ class Frame {
   IMU::Preintegrated *mpImuPreintegratedFrame;
 
   // Current and Next Frame id.
-  static long unsigned int nNextId;
-  long unsigned int mnId;
+  static long unsigned int next_id_;
+  long unsigned int id_;
 
   // Reference Keyframe.
   KeyFrame *mpReferenceKF;

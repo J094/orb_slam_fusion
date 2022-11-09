@@ -249,7 +249,7 @@ void LoopClosing::Run() {
 
 void LoopClosing::InsertKeyFrame(KeyFrame* pKF) {
   unique_lock<mutex> lock(mMutexLoopQueue);
-  if (pKF->mnId != 0) mlpLoopKeyFrameQueue.push_back(pKF);
+  if (pKF->id_ != 0) mlpLoopKeyFrameQueue.push_back(pKF);
 }
 
 bool LoopClosing::CheckNewKeyFrames() {
@@ -284,7 +284,7 @@ bool LoopClosing::NewDetectCommonRegions() {
       mpLastMap->GetAllKeyFrames().size() < 5)  // 12
   {
     // cout << "LoopClousure: Stereo KF inserted without check: " <<
-    // mpCurrentKF->mnId << endl;
+    // mpCurrentKF->id_ << endl;
     mpKeyFrameDB->add(mpCurrentKF);
     mpCurrentKF->SetErase();
     return false;
@@ -292,13 +292,13 @@ bool LoopClosing::NewDetectCommonRegions() {
 
   if (mpLastMap->GetAllKeyFrames().size() < 12) {
     // cout << "LoopClousure: Stereo KF inserted without check, map is small: "
-    // << mpCurrentKF->mnId << endl;
+    // << mpCurrentKF->id_ << endl;
     mpKeyFrameDB->add(mpCurrentKF);
     mpCurrentKF->SetErase();
     return false;
   }
 
-  // cout << "LoopClousure: Checking KF: " << mpCurrentKF->mnId << endl;
+  // cout << "LoopClousure: Checking KF: " << mpCurrentKF->id_ << endl;
 
   // Check the last candidates with geometric validation
   //  Loop candidates
@@ -522,7 +522,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(
   for (KeyFrame* pKFi : vpBowCand) {
     if (!pKFi || pKFi->isBad()) continue;
 
-    // std::cout << "KF candidate: " << pKFi->mnId << std::endl;
+    // std::cout << "KF candidate: " << pKFi->id_ << std::endl;
     // Current KF against KF with covisibles version
     std::vector<KeyFrame*> vpCovKFi =
         pKFi->GetBestCovisibilityKeyFrames(nNumCovisibles);
@@ -993,7 +993,7 @@ void LoopClosing::CorrectLoop() {
         MapPoint* pMPi = vpMPsi[iMP];
         if (!pMPi) continue;
         if (pMPi->isBad()) continue;
-        if (pMPi->mnCorrectedByKF == mpCurrentKF->mnId) continue;
+        if (pMPi->mnCorrectedByKF == mpCurrentKF->id_) continue;
 
         // Project with non-corrected pose and project back with corrected pose
         Eigen::Vector3d P3Dw = pMPi->GetWorldPos().cast<double>();
@@ -1001,8 +1001,8 @@ void LoopClosing::CorrectLoop() {
             g2oCorrectedSwi.map(g2oSiw.map(P3Dw));
 
         pMPi->SetWorldPos(eigCorrectedP3Dw.cast<float>());
-        pMPi->mnCorrectedByKF = mpCurrentKF->mnId;
-        pMPi->mnCorrectedReference = pKFi->mnId;
+        pMPi->mnCorrectedByKF = mpCurrentKF->id_;
+        pMPi->mnCorrectedReference = pKFi->id_;
         pMPi->UpdateNormalAndDepth();
       }
 
@@ -1102,7 +1102,7 @@ void LoopClosing::CorrectLoop() {
     mnCorrectionGBA = mnNumCorrection;
 
     mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment, this,
-                             pLoopMap, mpCurrentKF->mnId);
+                             pLoopMap, mpCurrentKF->id_);
   }
 
   // Loop closed. Release Local Mapping.
@@ -1110,7 +1110,7 @@ void LoopClosing::CorrectLoop() {
 
   mLastLoopKFid =
       mpCurrentKF
-          ->mnId;  // TODO old varible, it is not use in the new algorithm
+          ->id_;  // TODO old varible, it is not use in the new algorithm
 }
 
 void LoopClosing::MergeLocal() {
@@ -1405,7 +1405,7 @@ void LoopClosing::MergeLocal() {
         continue;
       }
 
-      // std::cout << "KF id: " << pKFi->mnId << std::endl;
+      // std::cout << "KF id: " << pKFi->id_ << std::endl;
 
       pKFi->mTcwBefMerge = pKFi->GetPose();
       pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
@@ -1413,7 +1413,7 @@ void LoopClosing::MergeLocal() {
 
       // Make sure connections are updated
       pKFi->UpdateMap(pMergeMap);
-      pKFi->mnMergeCorrectedForKF = mpCurrentKF->mnId;
+      pKFi->mnMergeCorrectedForKF = mpCurrentKF->id_;
       pMergeMap->AddKeyFrame(pKFi);
       pCurrentMap->EraseKeyFrame(pKFi);
 
@@ -1608,7 +1608,7 @@ void LoopClosing::MergeLocal() {
         if (!pKFi || pKFi->isBad() || pKFi->GetMap() != pCurrentMap) {
           continue;
         }
-        // std::cout << "KF id: " << pKFi->mnId << std::endl;
+        // std::cout << "KF id: " << pKFi->id_ << std::endl;
 
         // Make sure connections are updated
         pKFi->UpdateMap(pMergeMap);
@@ -1636,7 +1636,7 @@ void LoopClosing::MergeLocal() {
     mbFinishedGBA = false;
     mbStopGBA = false;
     mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment, this,
-                             pMergeMap, mpCurrentKF->mnId);
+                             pMergeMap, mpCurrentKF->id_);
   }
 
   mpMergeMatchedKF->AddMergeEdge(mpCurrentKF);
@@ -1710,8 +1710,8 @@ void LoopClosing::MergeLocal2() {
 
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     // cout << "updating active map to merge reference" << endl;
-    // cout << "curr merge KF id: " << mpCurrentKF->mnId << endl;
-    // cout << "curr tracking KF id: " << mpTracker->GetLastKeyFrame()->mnId <<
+    // cout << "curr merge KF id: " << mpCurrentKF->id_ << endl;
+    // cout << "curr tracking KF id: " << mpTracker->GetLastKeyFrame()->id_ <<
     // endl;
     bool bScaleVel = false;
     if (s_on != 1) bScaleVel = true;
@@ -1965,13 +1965,13 @@ void LoopClosing::CheckObservations(set<KeyFrame*>& spKFsMap1,
     }
 
     if (mMatchedMP.size() == 0) {
-      cout << "CHECK-OBS: KF " << pKFi1->mnId
+      cout << "CHECK-OBS: KF " << pKFi1->id_
            << " has not any matched MP with the other map" << endl;
     } else {
-      cout << "CHECK-OBS: KF " << pKFi1->mnId << " has matched MP with "
+      cout << "CHECK-OBS: KF " << pKFi1->id_ << " has matched MP with "
            << mMatchedMP.size() << " KF from the other map" << endl;
       for (pair<KeyFrame*, int> matchedKF : mMatchedMP) {
-        cout << "   -KF: " << matchedKF.first->mnId
+        cout << "   -KF: " << matchedKF.first->id_
              << ", Number of matches: " << matchedKF.second << endl;
       }
     }
@@ -2053,7 +2053,7 @@ void LoopClosing::SearchAndFuse(const vector<KeyFrame*>& vConectedKFs,
         pRep->Replace(vpMapPoints[i]);
       }
     }
-    /*cout << "FUSE-POSE: KF " << pKF->mnId << " ->" << num_replaces << " MPs
+    /*cout << "FUSE-POSE: KF " << pKF->id_ << " ->" << num_replaces << " MPs
     fused" << endl; total_replaces += num_replaces;*/
   }
   // cout << "FUSE-POSE: " << total_replaces << " MPs had been fused" << endl;
@@ -2165,7 +2165,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap,
       while (!lpKFtoCheck.empty()) {
         KeyFrame* pKF = lpKFtoCheck.front();
         const set<KeyFrame*> sChilds = pKF->GetChilds();
-        // cout << "---Updating KF " << pKF->mnId << " with " << sChilds.size()
+        // cout << "---Updating KF " << pKF->id_ << " with " << sChilds.size()
         // << " childs" << endl; cout << " KF mnBAGlobalForKF: " <<
         // pKF->mnBAGlobalForKF << endl;
         Sophus::SE3f Twc = pKF->GetPoseInverse();
@@ -2179,7 +2179,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap,
           if (pChild->mnBAGlobalForKF != nLoopKF) {
             // cout << "++++New child with flag " << pChild->mnBAGlobalForKF <<
             // "; LoopKF: " << nLoopKF << endl; cout << " child id: " <<
-            // pChild->mnId << endl;
+            // pChild->id_ << endl;
             Sophus::SE3f Tchildc = pChild->GetPose() * Twc;
             // cout << "Child pose: " << Tchildc << endl;
             // cout << "pKF->mTcwGBA: " << pKF->mTcwGBA << endl;
@@ -2208,7 +2208,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap,
         /*cv::Mat Tco_cn = pKF->mTcwBefGBA * pKF->mTcwGBA.inv();
         cv::Vec3d trasl = Tco_cn.rowRange(0,3).col(3);
         double dist = cv::norm(trasl);
-        cout << "GBA: KF " << pKF->mnId << " had been moved " << dist << "
+        cout << "GBA: KF " << pKF->id_ << " had been moved " << dist << "
         meters" << endl; double desvX = 0; double desvY = 0; double desvZ = 0;
         if(pKF->mbHasHessian)
         {
@@ -2259,7 +2259,7 @@ void LoopClosing::RunGlobalBundleAdjustment(Map* pActiveMap,
             cout << "--It has " << num_MPs << " MPs matched in the map" << endl;
 
             string namefile = "./test_GBA/GBA_" + to_string(nLoopKF) + "_KF" +
-        to_string(pKF->mnId) +"_D" + to_string(dist) +".png";
+        to_string(pKF->id_) +"_D" + to_string(dist) +".png";
             cv::imwrite(namefile, imLeft);
         }*/
 

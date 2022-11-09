@@ -27,7 +27,7 @@
 
 namespace ORB_SLAM_FUSION {
 
-long unsigned int MapPoint::nNextId = 0;
+long unsigned int MapPoint::next_id_ = 0;
 mutex MapPoint::mGlobalMutex;
 
 MapPoint::MapPoint()
@@ -50,7 +50,7 @@ MapPoint::MapPoint()
 }
 
 MapPoint::MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap)
-    : mnFirstKFid(pRefKF->mnId),
+    : mnFirstKFid(pRefKF->id_),
       mnFirstFrame(pRefKF->mnFrameId),
       nObs(0),
       mnTrackReferenceForFrame(0),
@@ -80,12 +80,12 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, KeyFrame* pRefKF, Map* pMap)
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
   unique_lock<mutex> lock(mpMap->mMutexPointCreation);
-  mnId = nNextId++;
+  id_ = next_id_++;
 }
 
 MapPoint::MapPoint(const double invDepth, cv::Point2f uv_init, KeyFrame* pRefKF,
                    KeyFrame* pHostKF, Map* pMap)
-    : mnFirstKFid(pRefKF->mnId),
+    : mnFirstKFid(pRefKF->id_),
       mnFirstFrame(pRefKF->mnFrameId),
       nObs(0),
       mnTrackReferenceForFrame(0),
@@ -116,13 +116,13 @@ MapPoint::MapPoint(const double invDepth, cv::Point2f uv_init, KeyFrame* pRefKF,
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
   unique_lock<mutex> lock(mpMap->mMutexPointCreation);
-  mnId = nNextId++;
+  id_ = next_id_++;
 }
 
 MapPoint::MapPoint(const Eigen::Vector3f& Pos, Map* pMap, Frame* pFrame,
                    const int& idxF)
     : mnFirstKFid(-1),
-      mnFirstFrame(pFrame->mnId),
+      mnFirstFrame(pFrame->id_),
       nObs(0),
       mnTrackReferenceForFrame(0),
       mnLastFrameSeen(0),
@@ -170,7 +170,7 @@ MapPoint::MapPoint(const Eigen::Vector3f& Pos, Map* pMap, Frame* pFrame,
   // MapPoints can be created from Tracking and Local Mapping. This mutex avoid
   // conflicts with id.
   unique_lock<mutex> lock(mpMap->mMutexPointCreation);
-  mnId = nNextId++;
+  id_ = next_id_++;
 }
 
 void MapPoint::SetWorldPos(const Eigen::Vector3f& Pos) {
@@ -290,7 +290,7 @@ MapPoint* MapPoint::GetReplaced() {
 }
 
 void MapPoint::Replace(MapPoint* pMP) {
-  if (pMP->mnId == this->mnId) return;
+  if (pMP->id_ == this->id_) return;
 
   int nvisible, nfound;
   map<KeyFrame*, tuple<int, int>> obs;
@@ -564,14 +564,14 @@ int MapPoint::PredictScale(const float& currentDist, Frame* pF) {
 }
 
 void MapPoint::PrintObservations() {
-  cout << "MP_OBS: MP " << mnId << endl;
+  cout << "MP_OBS: MP " << id_ << endl;
   for (map<KeyFrame*, tuple<int, int>>::iterator mit = mObservations.begin(),
                                                  mend = mObservations.end();
        mit != mend; mit++) {
     KeyFrame* pKFi = mit->first;
     tuple<int, int> indexes = mit->second;
     int leftIndex = get<0>(indexes), rightIndex = get<1>(indexes);
-    cout << "--OBS in KF " << pKFi->mnId << " in map "
+    cout << "--OBS in KF " << pKFi->id_ << " in map "
          << pKFi->GetMap()->GetId() << endl;
   }
 }
@@ -589,7 +589,7 @@ void MapPoint::UpdateMap(Map* pMap) {
 void MapPoint::PreSave(set<KeyFrame*>& spKF, set<MapPoint*>& spMP) {
   mBackupReplacedId = -1;
   if (mpReplaced && spMP.find(mpReplaced) != spMP.end())
-    mBackupReplacedId = mpReplaced->mnId;
+    mBackupReplacedId = mpReplaced->id_;
 
   mBackupObservationsId1.clear();
   mBackupObservationsId2.clear();
@@ -600,8 +600,8 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF, set<MapPoint*>& spMP) {
        it != end; ++it) {
     KeyFrame* pKFi = it->first;
     if (spKF.find(pKFi) != spKF.end()) {
-      mBackupObservationsId1[it->first->mnId] = get<0>(it->second);
-      mBackupObservationsId2[it->first->mnId] = get<1>(it->second);
+      mBackupObservationsId1[it->first->id_] = get<0>(it->second);
+      mBackupObservationsId2[it->first->id_] = get<1>(it->second);
     } else {
       EraseObservation(pKFi);
     }
@@ -609,7 +609,7 @@ void MapPoint::PreSave(set<KeyFrame*>& spKF, set<MapPoint*>& spMP) {
 
   // Save the id of the reference KF
   if (spKF.find(mpRefKF) != spKF.end()) {
-    mBackupRefKFId = mpRefKF->mnId;
+    mBackupRefKFId = mpRefKF->id_;
   }
 }
 

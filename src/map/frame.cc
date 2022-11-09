@@ -36,7 +36,7 @@
 
 namespace ORB_SLAM_FUSION {
 
-long unsigned int Frame::nNextId = 0;
+long unsigned int Frame::next_id_ = 0;
 bool Frame::mbInitialComputations = true;
 float Frame::cx, Frame::cy, Frame::fx, Frame::fy, Frame::invfx, Frame::invfy;
 float Frame::mnMinX, Frame::mnMinY, Frame::mnMaxX, Frame::mnMaxY;
@@ -86,7 +86,7 @@ Frame::Frame(const Frame &frame)
       mpImuPreintegrated(frame.mpImuPreintegrated),
       mpImuPreintegratedFrame(frame.mpImuPreintegratedFrame),
       mImuBias(frame.mImuBias),
-      mnId(frame.mnId),
+      id_(frame.id_),
       mpReferenceKF(frame.mpReferenceKF),
       mnScaleLevels(frame.mnScaleLevels),
       mfScaleFactor(frame.mfScaleFactor),
@@ -164,7 +164,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
       mbHasPose(false),
       mbHasVelocity(false) {
   // Frame ID
-  mnId = nNextId++;
+  id_ = next_id_++;
 
   // Scale Level Info
   mnScaleLevels = orb_extractor_left_->GetLevels();
@@ -262,7 +262,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
       mbHasPose(false),
       mbHasVelocity(false) {
   // Frame ID
-  mnId = nNextId++;
+  id_ = next_id_++;
 
   // Scale Level Info
   mnScaleLevels = orb_extractor_left_->GetLevels();
@@ -359,7 +359,7 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
       mbHasPose(false),
       mbHasVelocity(false) {
   // Frame ID
-  mnId = nNextId++;
+  id_ = next_id_++;
 
   // Scale Level Info
   mnScaleLevels = orb_extractor_left_->GetLevels();
@@ -1061,7 +1061,7 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
   imgRight = imRight.clone();
 
   // Frame ID
-  mnId = nNextId++;
+  id_ = next_id_++;
 
   // Scale Level Info
   mnScaleLevels = orb_extractor_left_->GetLevels();
