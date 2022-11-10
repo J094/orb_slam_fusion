@@ -431,7 +431,7 @@ void Sim3Solver::Project(const vector<Eigen::Vector3f> &vP3Dw,
 
   for (size_t i = 0, iend = vP3Dw.size(); i < iend; i++) {
     Eigen::Vector3f P3Dc = Rcw * vP3Dw[i] + tcw;
-    Eigen::Vector2f pt2D = pCamera->project(P3Dc);
+    Eigen::Vector2f pt2D = pCamera->Project(P3Dc);
     vP2D.push_back(pt2D);
   }
 }
@@ -443,7 +443,7 @@ void Sim3Solver::FromCameraToImage(const vector<Eigen::Vector3f> &vP3Dc,
   vP2D.reserve(vP3Dc.size());
 
   for (size_t i = 0, iend = vP3Dc.size(); i < iend; i++) {
-    Eigen::Vector2f pt2D = pCamera->project(vP3Dc[i]);
+    Eigen::Vector2f pt2D = pCamera->Project(vP3Dc[i]);
     vP2D.push_back(pt2D);
   }
 }

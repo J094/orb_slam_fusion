@@ -82,7 +82,7 @@ MLPnPsolver::MLPnPsolver(const Frame &F,
         mvSigma2.push_back(F.mvLevelSigma2[kp.octave]);
 
         // Bearing vector should be normalized
-        cv::Point3f cv_br = cam_->unproject(kp.pt);
+        cv::Point3f cv_br = cam_->Unproject(kp.pt);
         cv_br /= cv_br.z;
         bearingVector_t br(cv_br.x, cv_br.y, cv_br.z);
         mvBearingVecs.push_back(br);
@@ -273,7 +273,7 @@ void MLPnPsolver::CheckInliers() {
         mRi[2][0] * P3Dw.x + mRi[2][1] * P3Dw.y + mRi[2][2] * P3Dw.z + mti[2];
 
     cv::Point3f P3Dc(xc, yc, zc);
-    cv::Point2f uv = cam_->project(P3Dc);
+    cv::Point2f uv = cam_->Project(P3Dc);
 
     float distX = P2D.x - uv.x;
     float distY = P2D.y - uv.y;

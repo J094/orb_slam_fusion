@@ -69,7 +69,7 @@ class GeometricCamera {
 
   virtual bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& kps_1,
                                        const std::vector<cv::KeyPoint>& kps_2,
-                                       const std::vector<int>& matches12,
+                                       const std::vector<int>& matches,
                                        Sophus::SE3f& T21_so,
                                        std::vector<cv::Point3f>& p3ds_cv,
                                        std::vector<bool>& is_triangulated) = 0;
@@ -77,7 +77,7 @@ class GeometricCamera {
   virtual cv::Mat ToKCv() = 0;
   virtual Eigen::Matrix3f ToKEig() = 0;
 
-  virtual bool EpipolarConstrain(GeometricCamera* other_cam,
+  virtual bool EpipolarConstrain(GeometricCamera* cam_2,
                                  const cv::KeyPoint& kp_1,
                                  const cv::KeyPoint& kp_2,
                                  const Eigen::Matrix3f& R12_eig,

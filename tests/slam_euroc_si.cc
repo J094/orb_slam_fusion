@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 
   if (argc < 5) {
     cerr << endl
-         << "Usage: ./stereo_inertial_euroc [path_to_vocabulary] "
+         << "Usage: ./slam_euroc_si [path_to_vocabulary] "
             "[path_to_settings] [path_to_sequence_folder] [path_to_times_file]"
          << endl;
     return 1;

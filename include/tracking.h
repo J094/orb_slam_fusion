@@ -242,8 +242,8 @@ class Tracking {
   LoopClosing* mpLoopClosing;
 
   // ORB
-  ORBextractor *orb_extractor_left_, *orb_extractor_right_;
-  ORBextractor* mpIniORBextractor;
+  OrbExtractor *orb_extractor_left_, *orb_extractor_right_;
+  OrbExtractor* mpIniORBextractor;
 
   // BoW
   ORBVocabulary* orb_voc_;

@@ -425,7 +425,7 @@ int ORBmatcher::SearchByProjection(KeyFrame *pKF, Sophus::Sim3f &Scw,
     if (p3Dc(2) < 0.0) continue;
 
     // Project into Image
-    const Eigen::Vector2f uv = pKF->cam_->project(p3Dc);
+    const Eigen::Vector2f uv = pKF->cam_->Project(p3Dc);
 
     // Point must be inside the image
     if (!pKF->IsInImage(uv(0), uv(1))) continue;
@@ -828,7 +828,7 @@ int ORBmatcher::SearchForTriangulation(
   Eigen::Vector3f Cw = pKF1->GetCameraCenter();
   Eigen::Vector3f C2 = T2w * Cw;
 
-  Eigen::Vector2f ep = pKF2->cam_->project(C2);
+  Eigen::Vector2f ep = pKF2->cam_->Project(C2);
   Sophus::SE3f T12;
   Sophus::SE3f Tll, Tlr, Trl, Trr;
   Eigen::Matrix3f R12;  // for fastest computation
@@ -970,7 +970,7 @@ int ORBmatcher::SearchForTriangulation(
           }
 
           if (bCoarse ||
-              pCamera1->epipolarConstrain(
+              pCamera1->EpipolarConstrain(
                   pCamera2, kp1, kp2, R12, t12, pKF1->mvLevelSigma2[kp1.octave],
                   pKF2->mvLevelSigma2[kp2.octave]))  // MODIFICATION_2
           {
@@ -1096,7 +1096,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, const vector<MapPoint *> &vpMapPoints,
 
     const float invz = 1 / p3Dc(2);
 
-    const Eigen::Vector2f uv = pCamera->project(p3Dc);
+    const Eigen::Vector2f uv = pCamera->Project(p3Dc);
 
     // Point must be inside the image
     if (!pKF->IsInImage(uv(0), uv(1))) {
@@ -1249,7 +1249,7 @@ int ORBmatcher::Fuse(KeyFrame *pKF, Sophus::Sim3f &Scw,
     if (p3Dc(2) < 0.0f) continue;
 
     // Project into Image
-    const Eigen::Vector2f uv = pKF->cam_->project(p3Dc);
+    const Eigen::Vector2f uv = pKF->cam_->Project(p3Dc);
 
     // Point must be inside the image
     if (!pKF->IsInImage(uv(0), uv(1))) continue;
@@ -1549,7 +1549,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
 
         if (invzc < 0) continue;
 
-        Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dc);
+        Eigen::Vector2f uv = CurrentFrame.cam_->Project(x3Dc);
 
         if (uv(0) < CurrentFrame.mnMinX || uv(0) > CurrentFrame.mnMaxX)
           continue;
@@ -1633,7 +1633,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, const Frame &LastFrame,
         }
         if (CurrentFrame.Nleft != -1) {
           Eigen::Vector3f x3Dr = CurrentFrame.GetRelativePoseTrl() * x3Dc;
-          Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dr);
+          Eigen::Vector2f uv = CurrentFrame.cam_->Project(x3Dr);
 
           int nLastOctave =
               (LastFrame.Nleft == -1 || i < LastFrame.Nleft)
@@ -1753,7 +1753,7 @@ int ORBmatcher::SearchByProjection(Frame &CurrentFrame, KeyFrame *pKF,
         Eigen::Vector3f x3Dw = pMP->GetWorldPos();
         Eigen::Vector3f x3Dc = Tcw * x3Dw;
 
-        const Eigen::Vector2f uv = CurrentFrame.cam_->project(x3Dc);
+        const Eigen::Vector2f uv = CurrentFrame.cam_->Project(x3Dc);
 
         if (uv(0) < CurrentFrame.mnMinX || uv(0) > CurrentFrame.mnMaxX)
           continue;

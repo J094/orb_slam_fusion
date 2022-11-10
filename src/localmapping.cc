@@ -473,8 +473,8 @@ void LocalMapping::CreateNewMapPoints() {
       }
 
       // Check parallax between rays
-      Eigen::Vector3f xn1 = pCamera1->unprojectEig(kp1.pt);
-      Eigen::Vector3f xn2 = pCamera2->unprojectEig(kp2.pt);
+      Eigen::Vector3f xn1 = pCamera1->UnprojectEig(kp1.pt);
+      Eigen::Vector3f xn2 = pCamera2->UnprojectEig(kp2.pt);
 
       Eigen::Vector3f ray1 = Rwc1 * xn1;
       Eigen::Vector3f ray2 = Rwc2 * xn2;
@@ -534,7 +534,7 @@ void LocalMapping::CreateNewMapPoints() {
       const float invz1 = 1.0 / z1;
 
       if (!bStereo1) {
-        cv::Point2f uv1 = pCamera1->project(cv::Point3f(x1, y1, z1));
+        cv::Point2f uv1 = pCamera1->Project(cv::Point3f(x1, y1, z1));
         float errX1 = uv1.x - kp1.pt.x;
         float errY1 = uv1.y - kp1.pt.y;
 
@@ -558,7 +558,7 @@ void LocalMapping::CreateNewMapPoints() {
       const float y2 = Rcw2.row(1).dot(x3D) + tcw2(1);
       const float invz2 = 1.0 / z2;
       if (!bStereo2) {
-        cv::Point2f uv2 = pCamera2->project(cv::Point3f(x2, y2, z2));
+        cv::Point2f uv2 = pCamera2->Project(cv::Point3f(x2, y2, z2));
         float errX2 = uv2.x - kp2.pt.x;
         float errY2 = uv2.y - kp2.pt.y;
         if ((errX2 * errX2 + errY2 * errY2) > 5.991 * sigmaSquare2) continue;

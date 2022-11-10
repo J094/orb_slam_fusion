@@ -145,16 +145,16 @@ void Tracking::newParameterLoader(Settings* settings) {
   img_scale_ = 1.0f;
 
   cv_K_ = cv::Mat::eye(3, 3, CV_32F);
-  cv_K_.at<float>(0, 0) = cam_->getParameter(0);
-  cv_K_.at<float>(1, 1) = cam_->getParameter(1);
-  cv_K_.at<float>(0, 2) = cam_->getParameter(2);
-  cv_K_.at<float>(1, 2) = cam_->getParameter(3);
+  cv_K_.at<float>(0, 0) = cam_->GetParameter(0);
+  cv_K_.at<float>(1, 1) = cam_->GetParameter(1);
+  cv_K_.at<float>(0, 2) = cam_->GetParameter(2);
+  cv_K_.at<float>(1, 2) = cam_->GetParameter(3);
 
   eig_K_.setIdentity();
-  eig_K_(0, 0) = cam_->getParameter(0);
-  eig_K_(1, 1) = cam_->getParameter(1);
-  eig_K_(0, 2) = cam_->getParameter(2);
-  eig_K_(1, 2) = cam_->getParameter(3);
+  eig_K_(0, 0) = cam_->GetParameter(0);
+  eig_K_(1, 1) = cam_->GetParameter(1);
+  eig_K_(0, 2) = cam_->GetParameter(2);
+  eig_K_(1, 2) = cam_->GetParameter(3);
 
   if ((sensor_ == System::kStereo || sensor_ == System::kImuStereo ||
        sensor_ == System::kImuRgbd) &&
@@ -192,15 +192,15 @@ void Tracking::newParameterLoader(Settings* settings) {
   int fMinThFAST = settings->minThFAST();
   float fScaleFactor = settings->scaleFactor();
 
-  orb_extractor_left_ = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+  orb_extractor_left_ = new OrbExtractor(nFeatures, fScaleFactor, nLevels,
                                          fIniThFAST, fMinThFAST);
 
   if (sensor_ == System::kStereo || sensor_ == System::kImuStereo)
-    orb_extractor_right_ = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+    orb_extractor_right_ = new OrbExtractor(nFeatures, fScaleFactor, nLevels,
                                             fIniThFAST, fMinThFAST);
 
   if (sensor_ == System::kMonocular || sensor_ == System::kImuMonocular)
-    mpIniORBextractor = new ORBextractor(5 * nFeatures, fScaleFactor, nLevels,
+    mpIniORBextractor = new OrbExtractor(5 * nFeatures, fScaleFactor, nLevels,
                                          fIniThFAST, fMinThFAST);
 
   // IMU parameters
@@ -624,8 +624,8 @@ bool Tracking::ParseCamParamFile(cv::FileStorage& fSettings) {
           rightLappingEnd = rightLappingEnd * img_scale_;
         }
 
-        static_cast<KannalaBrandt8*>(cam_)->mvLappingArea[0] = leftLappingBegin;
-        static_cast<KannalaBrandt8*>(cam_)->mvLappingArea[1] = leftLappingEnd;
+        static_cast<KannalaBrandt8*>(cam_)->lapping_areas_[0] = leftLappingBegin;
+        static_cast<KannalaBrandt8*>(cam_)->lapping_areas_[1] = leftLappingEnd;
 
         frame_drawer_->both = true;
 
@@ -635,9 +635,9 @@ bool Tracking::ParseCamParamFile(cv::FileStorage& fSettings) {
 
         so_Tlr_ = Converter::toSophus(cvTlr);
 
-        static_cast<KannalaBrandt8*>(cam2_)->mvLappingArea[0] =
+        static_cast<KannalaBrandt8*>(cam2_)->lapping_areas_[0] =
             rightLappingBegin;
-        static_cast<KannalaBrandt8*>(cam2_)->mvLappingArea[1] = rightLappingEnd;
+        static_cast<KannalaBrandt8*>(cam2_)->lapping_areas_[1] = rightLappingEnd;
 
         std::cout << "- Camera1 Lapping: " << leftLappingBegin << ", "
                   << leftLappingEnd << std::endl;
@@ -705,7 +705,7 @@ bool Tracking::ParseCamParamFile(cv::FileStorage& fSettings) {
 
   if (sensor_ == System::kStereo || sensor_ == System::kRgbd ||
       sensor_ == System::kImuStereo || sensor_ == System::kImuRgbd) {
-    float fx = cam_->getParameter(0);
+    float fx = cam_->GetParameter(0);
     cv::FileNode node = fSettings["ThDepth"];
     if (!node.empty() && node.isReal()) {
       th_depth_ = node.real();
@@ -747,51 +747,51 @@ bool Tracking::ParseORBParamFile(cv::FileStorage& fSettings) {
   int nFeatures, nLevels, fIniThFAST, fMinThFAST;
   float fScaleFactor;
 
-  cv::FileNode node = fSettings["ORBextractor.nFeatures"];
+  cv::FileNode node = fSettings["OrbExtractor.nFeatures"];
   if (!node.empty() && node.isInt()) {
     nFeatures = node.operator int();
   } else {
-    std::cerr << "*ORBextractor.nFeatures parameter doesn't exist or is not an "
+    std::cerr << "*OrbExtractor.nFeatures parameter doesn't exist or is not an "
                  "integer*"
               << std::endl;
     b_miss_params = true;
   }
 
-  node = fSettings["ORBextractor.scaleFactor"];
+  node = fSettings["OrbExtractor.scaleFactor"];
   if (!node.empty() && node.isReal()) {
     fScaleFactor = node.real();
   } else {
-    std::cerr << "*ORBextractor.scaleFactor parameter doesn't exist or is not "
+    std::cerr << "*OrbExtractor.scaleFactor parameter doesn't exist or is not "
                  "a real number*"
               << std::endl;
     b_miss_params = true;
   }
 
-  node = fSettings["ORBextractor.nLevels"];
+  node = fSettings["OrbExtractor.nLevels"];
   if (!node.empty() && node.isInt()) {
     nLevels = node.operator int();
   } else {
     std::cerr
-        << "*ORBextractor.nLevels parameter doesn't exist or is not an integer*"
+        << "*OrbExtractor.nLevels parameter doesn't exist or is not an integer*"
         << std::endl;
     b_miss_params = true;
   }
 
-  node = fSettings["ORBextractor.iniThFAST"];
+  node = fSettings["OrbExtractor.iniThFAST"];
   if (!node.empty() && node.isInt()) {
     fIniThFAST = node.operator int();
   } else {
-    std::cerr << "*ORBextractor.iniThFAST parameter doesn't exist or is not an "
+    std::cerr << "*OrbExtractor.iniThFAST parameter doesn't exist or is not an "
                  "integer*"
               << std::endl;
     b_miss_params = true;
   }
 
-  node = fSettings["ORBextractor.minThFAST"];
+  node = fSettings["OrbExtractor.minThFAST"];
   if (!node.empty() && node.isInt()) {
     fMinThFAST = node.operator int();
   } else {
-    std::cerr << "*ORBextractor.minThFAST parameter doesn't exist or is not an "
+    std::cerr << "*OrbExtractor.minThFAST parameter doesn't exist or is not an "
                  "integer*"
               << std::endl;
     b_miss_params = true;
@@ -801,15 +801,15 @@ bool Tracking::ParseORBParamFile(cv::FileStorage& fSettings) {
     return false;
   }
 
-  orb_extractor_left_ = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+  orb_extractor_left_ = new OrbExtractor(nFeatures, fScaleFactor, nLevels,
                                          fIniThFAST, fMinThFAST);
 
   if (sensor_ == System::kStereo || sensor_ == System::kImuStereo)
-    orb_extractor_right_ = new ORBextractor(nFeatures, fScaleFactor, nLevels,
+    orb_extractor_right_ = new OrbExtractor(nFeatures, fScaleFactor, nLevels,
                                             fIniThFAST, fMinThFAST);
 
   if (sensor_ == System::kMonocular || sensor_ == System::kImuMonocular)
-    mpIniORBextractor = new ORBextractor(5 * nFeatures, fScaleFactor, nLevels,
+    mpIniORBextractor = new OrbExtractor(5 * nFeatures, fScaleFactor, nLevels,
                                          fIniThFAST, fMinThFAST);
 
   cout << endl << "ORB Extractor Parameters: " << endl;

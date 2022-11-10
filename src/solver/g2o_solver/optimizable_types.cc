@@ -58,7 +58,7 @@ void EdgeSE3ProjectXYZOnlyPose::linearizeOplus() {
   SE3deriv << 0.f, z, -y, 1.f, 0.f, 0.f, -z, 0.f, x, 0.f, 1.f, 0.f, y, -x, 0.f,
       0.f, 0.f, 1.f;
 
-  _jacobianOplusXi = -pCamera->projectJac(xyz_trans) * SE3deriv;
+  _jacobianOplusXi = -pCamera->ProjectJac(xyz_trans) * SE3deriv;
 }
 
 bool EdgeSE3ProjectXYZOnlyPoseToBody::read(std::istream& is) {
@@ -100,7 +100,7 @@ void EdgeSE3ProjectXYZOnlyPoseToBody::linearizeOplus() {
       -x_w, 0.f, 0.f, 0.f, 1.f;
 
   _jacobianOplusXi =
-      -pCamera->projectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
+      -pCamera->ProjectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
 }
 
 EdgeSE3ProjectXYZ::EdgeSE3ProjectXYZ()
@@ -143,7 +143,7 @@ void EdgeSE3ProjectXYZ::linearizeOplus() {
   double y = xyz_trans[1];
   double z = xyz_trans[2];
 
-  auto projectJac = -pCamera->projectJac(xyz_trans);
+  auto projectJac = -pCamera->ProjectJac(xyz_trans);
 
   _jacobianOplusXi = projectJac * T.rotation().toRotationMatrix();
 
@@ -193,7 +193,7 @@ void EdgeSE3ProjectXYZToBody::linearizeOplus() {
   Eigen::Vector3d X_r = mTrl.map(T_lw.map(X_w));
 
   _jacobianOplusXi =
-      -pCamera->projectJac(X_r) * T_rw.rotation().toRotationMatrix();
+      -pCamera->ProjectJac(X_r) * T_rw.rotation().toRotationMatrix();
 
   double x = X_l[0];
   double y = X_l[1];
@@ -204,7 +204,7 @@ void EdgeSE3ProjectXYZToBody::linearizeOplus() {
       0.f, 0.f, 1.f;
 
   _jacobianOplusXj =
-      -pCamera->projectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
+      -pCamera->ProjectJac(X_r) * mTrl.rotation().toRotationMatrix() * SE3deriv;
 }
 
 VertexSim3Expmap::VertexSim3Expmap() : BaseVertex<7, g2o::Sim3>() {
@@ -220,14 +220,14 @@ bool VertexSim3Expmap::read(std::istream& is) {
   is >> cam2world[6];
 
   float nextParam;
-  for (size_t i = 0; i < pCamera1->size(); i++) {
+  for (size_t i = 0; i < pCamera1->Size(); i++) {
     is >> nextParam;
-    pCamera1->setParameter(nextParam, i);
+    pCamera1->SetParameter(nextParam, i);
   }
 
-  for (size_t i = 0; i < pCamera2->size(); i++) {
+  for (size_t i = 0; i < pCamera2->Size(); i++) {
     is >> nextParam;
-    pCamera2->setParameter(nextParam, i);
+    pCamera2->SetParameter(nextParam, i);
   }
 
   setEstimate(g2o::Sim3(cam2world).inverse());
@@ -241,12 +241,12 @@ bool VertexSim3Expmap::write(std::ostream& os) const {
     os << lv[i] << " ";
   }
 
-  for (size_t i = 0; i < pCamera1->size(); i++) {
-    os << pCamera1->getParameter(i) << " ";
+  for (size_t i = 0; i < pCamera1->Size(); i++) {
+    os << pCamera1->GetParameter(i) << " ";
   }
 
-  for (size_t i = 0; i < pCamera2->size(); i++) {
-    os << pCamera2->getParameter(i) << " ";
+  for (size_t i = 0; i < pCamera2->Size(); i++) {
+    os << pCamera2->GetParameter(i) << " ";
   }
 
   return os.good();

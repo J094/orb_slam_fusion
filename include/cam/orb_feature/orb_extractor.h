@@ -30,25 +30,25 @@ namespace ORB_SLAM_FUSION {
 
 class ExtractorNode {
  public:
-  ExtractorNode() : bNoMore(false) {}
+  ExtractorNode() : no_more_(false) {}
 
-  void DivideNode(ExtractorNode &n1, ExtractorNode &n2, ExtractorNode &n3,
-                  ExtractorNode &n4);
+  void DivideNode(ExtractorNode &n_1, ExtractorNode &n_2, ExtractorNode &n_3,
+                  ExtractorNode &n_4);
 
-  std::vector<cv::KeyPoint> vKeys;
-  cv::Point2i UL, UR, BL, BR;
-  std::list<ExtractorNode>::iterator lit;
-  bool bNoMore;
+  std::vector<cv::KeyPoint> kps_;
+  cv::Point2i UL_, UR_, BL_, BR_;
+  std::list<ExtractorNode>::iterator lit_;
+  bool no_more_;
 };
 
-class ORBextractor {
+class OrbExtractor {
  public:
-  enum { HARRIS_SCORE = 0, FAST_SCORE = 1 };
+  enum { kHarrisScore = 0, kFastScore = 1 };
 
-  ORBextractor(int nfeatures, float scaleFactor, int nlevels, int iniThFAST,
-               int minThFAST);
+  OrbExtractor(int num_feats, float scale_factor, int num_levs, int ini_th_fast,
+               int min_th_fast);
 
-  ~ORBextractor() {}
+  ~OrbExtractor() {}
 
   // Compute the ORB features and descriptors on an image.
   // ORB are dispersed on the image using an octree.
@@ -57,23 +57,23 @@ class ORBextractor {
                  std::vector<cv::KeyPoint> &_keypoints,
                  cv::OutputArray _descriptors, std::vector<int> &vLappingArea);
 
-  int inline GetLevels() { return nlevels; }
+  int inline GetLevels() { return num_levs_; }
 
-  float inline GetScaleFactor() { return scaleFactor; }
+  float inline GetScaleFactor() { return scale_factor_; }
 
-  std::vector<float> inline GetScaleFactors() { return mvScaleFactor; }
+  std::vector<float> inline GetScaleFactors() { return scale_factors_; }
 
   std::vector<float> inline GetInverseScaleFactors() {
-    return mvInvScaleFactor;
+    return inv_scale_factors_;
   }
 
-  std::vector<float> inline GetScaleSigmaSquares() { return mvLevelSigma2; }
+  std::vector<float> inline GetScaleSigmaSquares() { return lev_sigma_2_; }
 
   std::vector<float> inline GetInverseScaleSigmaSquares() {
-    return mvInvLevelSigma2;
+    return inv_lev_sigma_2_;
   }
 
-  std::vector<cv::Mat> mvImagePyramid;
+  std::vector<cv::Mat> img_pyramid_;
 
  protected:
   void ComputePyramid(cv::Mat image);
@@ -86,22 +86,22 @@ class ORBextractor {
 
   void ComputeKeyPointsOld(
       std::vector<std::vector<cv::KeyPoint> > &allKeypoints);
-  std::vector<cv::Point> pattern;
+  std::vector<cv::Point> patterns_;
 
-  int nfeatures;
-  double scaleFactor;
-  int nlevels;
-  int iniThFAST;
-  int minThFAST;
+  int num_feats_;
+  double scale_factor_;
+  int num_levs_;
+  int ini_th_fast_;
+  int min_th_fast_;
 
-  std::vector<int> mnFeaturesPerLevel;
+  std::vector<int> num_feats_per_lev_;
 
-  std::vector<int> umax;
+  std::vector<int> umax_;
 
-  std::vector<float> mvScaleFactor;
-  std::vector<float> mvInvScaleFactor;
-  std::vector<float> mvLevelSigma2;
-  std::vector<float> mvInvLevelSigma2;
+  std::vector<float> scale_factors_;
+  std::vector<float> inv_scale_factors_;
+  std::vector<float> lev_sigma_2_;
+  std::vector<float> inv_lev_sigma_2_;
 };
 
 }  // namespace ORB_SLAM_FUSION

@@ -79,52 +79,51 @@ Eigen::Matrix<double, 2, 3> Pinhole::ProjectJac(const Eigen::Vector3d &p3d_eig) 
   return Jac;
 }
 
-bool Pinhole::ReconstructWithTwoViews(const std::vector<cv::KeyPoint> &vKeys1,
-                                      const std::vector<cv::KeyPoint> &vKeys2,
-                                      const std::vector<int> &vMatches12,
-                                      Sophus::SE3f &T21,
-                                      std::vector<cv::Point3f> &vP3D,
-                                      std::vector<bool> &vbTriangulated) {
-  if (!tvr) {
-    Eigen::Matrix3f K = this->toK_();
-    tvr = new TwoViewReconstruction(K);
+bool Pinhole::ReconstructWithTwoViews(const std::vector<cv::KeyPoint> &kps_1,
+                                      const std::vector<cv::KeyPoint> &kps_2,
+                                      const std::vector<int> &matches,
+                                      Sophus::SE3f &T21_so,
+                                      std::vector<cv::Point3f> &p3ds_cv,
+                                      std::vector<bool> &is_triangulated) {
+  if (!tvr_) {
+    Eigen::Matrix3f K = this->ToKEig();
+    tvr_ = new TwoViewReconstruction(K);
   }
-
-  return tvr->Reconstruct(vKeys1, vKeys2, vMatches12, T21, vP3D,
-                          vbTriangulated);
+  return tvr_->Reconstruct(kps_1, kps_2, matches, T21_so, p3ds_cv,
+                          is_triangulated);
 }
 
-cv::Mat Pinhole::toK() {
+cv::Mat Pinhole::ToKCv() {
   cv::Mat K = (cv::Mat_<float>(3, 3) << params_[0], 0.f, params_[2],
                0.f, params_[1], params_[3], 0.f, 0.f, 1.f);
   return K;
 }
 
-Eigen::Matrix3f Pinhole::toK_() {
+Eigen::Matrix3f Pinhole::ToKEig() {
   Eigen::Matrix3f K;
   K << params_[0], 0.f, params_[2], 0.f, params_[1],
       params_[3], 0.f, 0.f, 1.f;
   return K;
 }
 
-bool Pinhole::epipolarConstrain(GeometricCamera *pCamera2,
-                                const cv::KeyPoint &kp1,
-                                const cv::KeyPoint &kp2,
-                                const Eigen::Matrix3f &R12,
-                                const Eigen::Vector3f &t12,
-                                const float sigmaLevel, const float unc) {
+bool Pinhole::EpipolarConstrain(GeometricCamera *cam_2,
+                                const cv::KeyPoint &kp_1,
+                                const cv::KeyPoint &kp_2,
+                                const Eigen::Matrix3f &R12_eig,
+                                const Eigen::Vector3f &t12_eig,
+                                const float sigma_lev, const float unc) {
   // Compute Fundamental Matrix
-  Eigen::Matrix3f t12x = Sophus::SO3f::hat(t12);
-  Eigen::Matrix3f K1 = this->toK_();
-  Eigen::Matrix3f K2 = pCamera2->toK_();
-  Eigen::Matrix3f F12 = K1.transpose().inverse() * t12x * R12 * K2.inverse();
+  Eigen::Matrix3f t12x = Sophus::SO3f::hat(t12_eig);
+  Eigen::Matrix3f K1 = this->ToKEig();
+  Eigen::Matrix3f K2 = cam_2->ToKEig();
+  Eigen::Matrix3f F12 = K1.transpose().inverse() * t12x * R12_eig * K2.inverse();
 
   // Epipolar line in second image l = x1'F12 = [a b c]
-  const float a = kp1.pt.x * F12(0, 0) + kp1.pt.y * F12(1, 0) + F12(2, 0);
-  const float b = kp1.pt.x * F12(0, 1) + kp1.pt.y * F12(1, 1) + F12(2, 1);
-  const float c = kp1.pt.x * F12(0, 2) + kp1.pt.y * F12(1, 2) + F12(2, 2);
+  const float a = kp_1.pt.x * F12(0, 0) + kp_1.pt.y * F12(1, 0) + F12(2, 0);
+  const float b = kp_1.pt.x * F12(0, 1) + kp_1.pt.y * F12(1, 1) + F12(2, 1);
+  const float c = kp_1.pt.x * F12(0, 2) + kp_1.pt.y * F12(1, 2) + F12(2, 2);
 
-  const float num = a * kp2.pt.x + b * kp2.pt.y + c;
+  const float num = a * kp_2.pt.x + b * kp_2.pt.y + c;
 
   const float den = a * a + b * b;
 
@@ -156,11 +155,11 @@ bool Pinhole::IsEqual(GeometricCamera *cam) {
 
   Pinhole *pPinholeCam = (Pinhole *)cam;
 
-  if (size() != pPinholeCam->size()) return false;
+  if (Size() != pPinholeCam->Size()) return false;
 
   bool is_same_camera = true;
-  for (size_t i = 0; i < size(); ++i) {
-    if (abs(params_[i] - pPinholeCam->getParameter(i)) > 1e-6) {
+  for (size_t i = 0; i < Size(); ++i) {
+    if (abs(params_[i] - pPinholeCam->GetParameter(i)) > 1e-6) {
       is_same_camera = false;
       break;
     }

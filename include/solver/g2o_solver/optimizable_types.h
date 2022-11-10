@@ -46,7 +46,7 @@ class EdgeSE3ProjectXYZOnlyPose
     const g2o::VertexSE3Expmap* v1 =
         static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
     Eigen::Vector2d obs(_measurement);
-    _error = obs - pCamera->project(v1->estimate().map(Xw));
+    _error = obs - pCamera->Project(v1->estimate().map(Xw));
   }
 
   bool isDepthPositive() {
@@ -76,7 +76,7 @@ class EdgeSE3ProjectXYZOnlyPoseToBody
     const g2o::VertexSE3Expmap* v1 =
         static_cast<const g2o::VertexSE3Expmap*>(_vertices[0]);
     Eigen::Vector2d obs(_measurement);
-    _error = obs - pCamera->project((mTrl * v1->estimate()).map(Xw));
+    _error = obs - pCamera->Project((mTrl * v1->estimate()).map(Xw));
   }
 
   bool isDepthPositive() {
@@ -111,7 +111,7 @@ class EdgeSE3ProjectXYZ
     const g2o::VertexSBAPointXYZ* v2 =
         static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
     Eigen::Vector2d obs(_measurement);
-    _error = obs - pCamera->project(v1->estimate().map(v2->estimate()));
+    _error = obs - pCamera->Project(v1->estimate().map(v2->estimate()));
   }
 
   bool isDepthPositive() {
@@ -146,7 +146,7 @@ class EdgeSE3ProjectXYZToBody
         static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
     Eigen::Vector2d obs(_measurement);
     _error =
-        obs - pCamera->project((mTrl * v1->estimate()).map(v2->estimate()));
+        obs - pCamera->Project((mTrl * v1->estimate()).map(v2->estimate()));
   }
 
   bool isDepthPositive() {
@@ -202,7 +202,7 @@ class EdgeSim3ProjectXYZ
         static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
     Eigen::Vector2d obs(_measurement);
-    _error = obs - v1->pCamera1->project(v1->estimate().map(v2->estimate()));
+    _error = obs - v1->pCamera1->Project(v1->estimate().map(v2->estimate()));
   }
 
   // virtual void linearizeOplus();
@@ -224,7 +224,7 @@ class EdgeInverseSim3ProjectXYZ
         static_cast<const g2o::VertexSBAPointXYZ*>(_vertices[0]);
 
     Eigen::Vector2d obs(_measurement);
-    _error = obs - v1->pCamera2->project(
+    _error = obs - v1->pCamera2->Project(
                        (v1->estimate().inverse().map(v2->estimate())));
   }
 

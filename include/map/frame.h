@@ -44,7 +44,7 @@ class MapPoint;
 class KeyFrame;
 class ConstraintPoseImu;
 class GeometricCamera;
-class ORBextractor;
+class OrbExtractor;
 
 class Frame {
  public:
@@ -55,7 +55,7 @@ class Frame {
 
   // Constructor for stereo cameras.
   Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
-        ORBextractor *extractorLeft, ORBextractor *extractorRight,
+        OrbExtractor *extractorLeft, OrbExtractor *extractorRight,
         ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
         const float &thDepth, GeometricCamera *pCamera,
         Frame *pPrevF = static_cast<Frame *>(NULL),
@@ -63,13 +63,13 @@ class Frame {
 
   // Constructor for RGB-D cameras.
   Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp,
-        ORBextractor *extractor, ORBVocabulary *voc, cv::Mat &K,
+        OrbExtractor *extractor, ORBVocabulary *voc, cv::Mat &K,
         cv::Mat &distCoef, const float &bf, const float &thDepth,
         GeometricCamera *pCamera, Frame *pPrevF = static_cast<Frame *>(NULL),
         const IMU::Calib &ImuCalib = IMU::Calib());
 
   // Constructor for Monocular cameras.
-  Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor *extractor,
+  Frame(const cv::Mat &imGray, const double &timeStamp, OrbExtractor *extractor,
         ORBVocabulary *voc, GeometricCamera *pCamera, cv::Mat &distCoef,
         const float &bf, const float &thDepth,
         Frame *pPrevF = static_cast<Frame *>(NULL),
@@ -197,7 +197,7 @@ class Frame {
   ORBVocabulary *mpORBvocabulary;
 
   // Feature extractor. The right is used only in the stereo case.
-  ORBextractor *orb_extractor_left_, *orb_extractor_right_;
+  OrbExtractor *orb_extractor_left_, *orb_extractor_right_;
 
   // Frame timestamp.
   double timestamp_;
@@ -345,7 +345,7 @@ class Frame {
   std::vector<std::size_t> mGridRight[FRAME_GRID_COLS][FRAME_GRID_ROWS];
 
   Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp,
-        ORBextractor *extractorLeft, ORBextractor *extractorRight,
+        OrbExtractor *extractorLeft, OrbExtractor *extractorRight,
         ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
         const float &thDepth, GeometricCamera *pCamera,
         GeometricCamera *pCamera2, Sophus::SE3f &Tlr,

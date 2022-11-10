@@ -278,7 +278,7 @@ void Settings::readCamera1(cv::FileStorage& fSettings) {
           readParameter<int>(fSettings, "Camera1.overlappingEnd", found);
       vector<int> vOverlapping = {colBegin, colEnd};
 
-      static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea = vOverlapping;
+      static_cast<KannalaBrandt8*>(calibration1_)->lapping_areas_ = vOverlapping;
     }
   } else {
     cerr << "Error: " << cameraModel << " not known" << endl;
@@ -345,13 +345,13 @@ void Settings::readCamera2(cv::FileStorage& fSettings) {
     int colEnd = readParameter<int>(fSettings, "Camera2.overlappingEnd", found);
     vector<int> vOverlapping = {colBegin, colEnd};
 
-    static_cast<KannalaBrandt8*>(calibration2_)->mvLappingArea = vOverlapping;
+    static_cast<KannalaBrandt8*>(calibration2_)->lapping_areas_ = vOverlapping;
   }
 
   // Load stereo extrinsic calibration
   if (cameraType_ == Rectified) {
     b_ = readParameter<float>(fSettings, "Stereo.b", found);
-    bf_ = b_ * calibration1_->getParameter(0);
+    bf_ = b_ * calibration1_->GetParameter(0);
   } else {
     cv::Mat cvTlr = readParameter<cv::Mat>(fSettings, "Stereo.T_c1_c2", found);
     Tlr_ = Converter::toSophus(cvTlr);
@@ -359,7 +359,7 @@ void Settings::readCamera2(cv::FileStorage& fSettings) {
     // TODO: also search for Trl and invert if necessary
 
     b_ = Tlr_.translation().norm();
-    bf_ = b_ * calibration1_->getParameter(0);
+    bf_ = b_ * calibration1_->GetParameter(0);
   }
 
   thDepth_ = readParameter<float>(fSettings, "Stereo.ThDepth", found);
@@ -384,17 +384,17 @@ void Settings::readImageInfo(cv::FileStorage& fSettings) {
       // Update calibration
       float scaleRowFactor =
           (float)newImSize_.height / (float)originalImSize_.height;
-      calibration1_->setParameter(
-          calibration1_->getParameter(1) * scaleRowFactor, 1);
-      calibration1_->setParameter(
-          calibration1_->getParameter(3) * scaleRowFactor, 3);
+      calibration1_->SetParameter(
+          calibration1_->GetParameter(1) * scaleRowFactor, 1);
+      calibration1_->SetParameter(
+          calibration1_->GetParameter(3) * scaleRowFactor, 3);
 
       if ((sensor_ == System::kStereo || sensor_ == System::kImuStereo) &&
           cameraType_ != Rectified) {
-        calibration2_->setParameter(
-            calibration2_->getParameter(1) * scaleRowFactor, 1);
-        calibration2_->setParameter(
-            calibration2_->getParameter(3) * scaleRowFactor, 3);
+        calibration2_->SetParameter(
+            calibration2_->GetParameter(1) * scaleRowFactor, 1);
+        calibration2_->SetParameter(
+            calibration2_->GetParameter(3) * scaleRowFactor, 3);
       }
     }
   }
@@ -408,27 +408,27 @@ void Settings::readImageInfo(cv::FileStorage& fSettings) {
       // Update calibration
       float scaleColFactor =
           (float)newImSize_.width / (float)originalImSize_.width;
-      calibration1_->setParameter(
-          calibration1_->getParameter(0) * scaleColFactor, 0);
-      calibration1_->setParameter(
-          calibration1_->getParameter(2) * scaleColFactor, 2);
+      calibration1_->SetParameter(
+          calibration1_->GetParameter(0) * scaleColFactor, 0);
+      calibration1_->SetParameter(
+          calibration1_->GetParameter(2) * scaleColFactor, 2);
 
       if ((sensor_ == System::kStereo || sensor_ == System::kImuStereo) &&
           cameraType_ != Rectified) {
-        calibration2_->setParameter(
-            calibration2_->getParameter(0) * scaleColFactor, 0);
-        calibration2_->setParameter(
-            calibration2_->getParameter(2) * scaleColFactor, 2);
+        calibration2_->SetParameter(
+            calibration2_->GetParameter(0) * scaleColFactor, 0);
+        calibration2_->SetParameter(
+            calibration2_->GetParameter(2) * scaleColFactor, 2);
 
         if (cameraType_ == kKannalaBrandt) {
-          static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea[0] *=
+          static_cast<KannalaBrandt8*>(calibration1_)->lapping_areas_[0] *=
               scaleColFactor;
-          static_cast<KannalaBrandt8*>(calibration1_)->mvLappingArea[1] *=
+          static_cast<KannalaBrandt8*>(calibration1_)->lapping_areas_[1] *=
               scaleColFactor;
 
-          static_cast<KannalaBrandt8*>(calibration2_)->mvLappingArea[0] *=
+          static_cast<KannalaBrandt8*>(calibration2_)->lapping_areas_[0] *=
               scaleColFactor;
-          static_cast<KannalaBrandt8*>(calibration2_)->mvLappingArea[1] *=
+          static_cast<KannalaBrandt8*>(calibration2_)->lapping_areas_[1] *=
               scaleColFactor;
         }
       }
@@ -466,18 +466,18 @@ void Settings::readRGBD(cv::FileStorage& fSettings) {
       readParameter<float>(fSettings, "kRgbd.DepthMapFactor", found);
   thDepth_ = readParameter<float>(fSettings, "Stereo.ThDepth", found);
   b_ = readParameter<float>(fSettings, "Stereo.b", found);
-  bf_ = b_ * calibration1_->getParameter(0);
+  bf_ = b_ * calibration1_->GetParameter(0);
 }
 
 void Settings::readORB(cv::FileStorage& fSettings) {
   bool found;
 
-  nFeatures_ = readParameter<int>(fSettings, "ORBextractor.nFeatures", found);
+  nFeatures_ = readParameter<int>(fSettings, "OrbExtractor.nFeatures", found);
   scaleFactor_ =
-      readParameter<float>(fSettings, "ORBextractor.scaleFactor", found);
-  nLevels_ = readParameter<int>(fSettings, "ORBextractor.nLevels", found);
-  initThFAST_ = readParameter<int>(fSettings, "ORBextractor.iniThFAST", found);
-  minThFAST_ = readParameter<int>(fSettings, "ORBextractor.minThFAST", found);
+      readParameter<float>(fSettings, "OrbExtractor.scaleFactor", found);
+  nLevels_ = readParameter<int>(fSettings, "OrbExtractor.nLevels", found);
+  initThFAST_ = readParameter<int>(fSettings, "OrbExtractor.iniThFAST", found);
+  minThFAST_ = readParameter<int>(fSettings, "OrbExtractor.minThFAST", found);
 }
 
 void Settings::readViewer(cv::FileStorage& fSettings) {
@@ -520,9 +520,9 @@ void Settings::readOtherParameters(cv::FileStorage& fSettings) {
 
 void Settings::precomputeRectificationMaps() {
   // Precompute rectification maps, new calibrations, ...
-  cv::Mat K1 = static_cast<Pinhole*>(calibration1_)->toK();
+  cv::Mat K1 = static_cast<Pinhole*>(calibration1_)->ToKCv();
   K1.convertTo(K1, CV_64F);
-  cv::Mat K2 = static_cast<Pinhole*>(calibration2_)->toK();
+  cv::Mat K2 = static_cast<Pinhole*>(calibration2_)->ToKCv();
   K2.convertTo(K2, CV_64F);
 
   cv::Mat cvTlr;
@@ -546,10 +546,10 @@ void Settings::precomputeRectificationMaps() {
                               CV_32F, M1r_, M2r_);
 
   // Update calibration
-  calibration1_->setParameter(P1.at<double>(0, 0), 0);
-  calibration1_->setParameter(P1.at<double>(1, 1), 1);
-  calibration1_->setParameter(P1.at<double>(0, 2), 2);
-  calibration1_->setParameter(P1.at<double>(1, 2), 3);
+  calibration1_->SetParameter(P1.at<double>(0, 0), 0);
+  calibration1_->SetParameter(P1.at<double>(1, 1), 1);
+  calibration1_->SetParameter(P1.at<double>(0, 2), 2);
+  calibration1_->SetParameter(P1.at<double>(1, 2), 3);
 
   // Update bf
   bf_ = b_ * P1.at<double>(0, 0);
@@ -575,8 +575,8 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
   }
   output << ")"
          << ": [";
-  for (size_t i = 0; i < settings.originalCalib1_->size(); i++) {
-    output << " " << settings.originalCalib1_->getParameter(i);
+  for (size_t i = 0; i < settings.originalCalib1_->Size(); i++) {
+    output << " " << settings.originalCalib1_->GetParameter(i);
   }
   output << " ]" << endl;
 
@@ -599,8 +599,8 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
     }
     output << ""
            << ": [";
-    for (size_t i = 0; i < settings.originalCalib2_->size(); i++) {
-      output << " " << settings.originalCalib2_->getParameter(i);
+    for (size_t i = 0; i < settings.originalCalib2_->Size(); i++) {
+      output << " " << settings.originalCalib2_->GetParameter(i);
     }
     output << " ]" << endl;
 
@@ -620,14 +620,14 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
 
   if (settings.bNeedToRectify_) {
     output << "\t-Camera 1 parameters after rectification: [ ";
-    for (size_t i = 0; i < settings.calibration1_->size(); i++) {
-      output << " " << settings.calibration1_->getParameter(i);
+    for (size_t i = 0; i < settings.calibration1_->Size(); i++) {
+      output << " " << settings.calibration1_->GetParameter(i);
     }
     output << " ]" << endl;
   } else if (settings.bNeedToResize1_) {
     output << "\t-Camera 1 parameters after resize: [ ";
-    for (size_t i = 0; i < settings.calibration1_->size(); i++) {
-      output << " " << settings.calibration1_->getParameter(i);
+    for (size_t i = 0; i < settings.calibration1_->Size(); i++) {
+      output << " " << settings.calibration1_->GetParameter(i);
     }
     output << " ]" << endl;
 
@@ -635,8 +635,8 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
          settings.sensor_ == System::kImuStereo) &&
         settings.cameraType_ == Settings::kKannalaBrandt) {
       output << "\t-Camera 2 parameters after resize: [ ";
-      for (size_t i = 0; i < settings.calibration2_->size(); i++) {
-        output << " " << settings.calibration2_->getParameter(i);
+      for (size_t i = 0; i < settings.calibration2_->Size(); i++) {
+        output << " " << settings.calibration2_->GetParameter(i);
       }
       output << " ]" << endl;
     }
@@ -652,9 +652,9 @@ ostream& operator<<(std::ostream& output, const Settings& settings) {
 
     if (settings.cameraType_ == Settings::kKannalaBrandt) {
       auto vOverlapping1 =
-          static_cast<KannalaBrandt8*>(settings.calibration1_)->mvLappingArea;
+          static_cast<KannalaBrandt8*>(settings.calibration1_)->lapping_areas_;
       auto vOverlapping2 =
-          static_cast<KannalaBrandt8*>(settings.calibration2_)->mvLappingArea;
+          static_cast<KannalaBrandt8*>(settings.calibration2_)->lapping_areas_;
       output << "\t-Camera 1 overlapping area: [ " << vOverlapping1[0] << " , "
              << vOverlapping1[1] << " ]" << endl;
       output << "\t-Camera 2 overlapping area: [ " << vOverlapping2[0] << " , "

@@ -43,21 +43,21 @@ class Pinhole : public GeometricCamera {
     type_ = kCamPinhole;
   }
   Pinhole(const std::vector<float> _vParameters)
-      : GeometricCamera(_vParameters), tvr(nullptr) {
+      : GeometricCamera(_vParameters), tvr_(nullptr) {
     assert(params_.size() == 4);
     id_ = next_id_++;
     type_ = kCamPinhole;
   }
 
   Pinhole(Pinhole* pPinhole)
-      : GeometricCamera(pPinhole->params_), tvr(nullptr) {
+      : GeometricCamera(pPinhole->params_), tvr_(nullptr) {
     assert(params_.size() == 4);
     id_ = next_id_++;
     type_ = kCamPinhole;
   }
 
   ~Pinhole() {
-    if (tvr) delete tvr;
+    if (tvr_) delete tvr_;
   }
 
   cv::Point2f Project(const cv::Point3f& p3d_cv);
@@ -72,26 +72,26 @@ class Pinhole : public GeometricCamera {
 
   Eigen::Matrix<double, 2, 3> ProjectJac(const Eigen::Vector3d& p3d_eig);
 
-  bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1,
-                               const std::vector<cv::KeyPoint>& vKeys2,
-                               const std::vector<int>& vMatches12,
-                               Sophus::SE3f& T21,
-                               std::vector<cv::Point3f>& vP3D,
-                               std::vector<bool>& vbTriangulated);
+  bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& kps_1,
+                               const std::vector<cv::KeyPoint>& kps_2,
+                               const std::vector<int>& matches,
+                               Sophus::SE3f& T21_so,
+                               std::vector<cv::Point3f>& p3ds_cv,
+                               std::vector<bool>& is_triangulated);
 
-  cv::Mat toK();
-  Eigen::Matrix3f toK_();
+  cv::Mat ToKCv();
+  Eigen::Matrix3f ToKEig();
 
-  bool epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint& kp1,
-                         const cv::KeyPoint& kp2, const Eigen::Matrix3f& R12,
-                         const Eigen::Vector3f& t12, const float sigmaLevel,
+  bool EpipolarConstrain(GeometricCamera* cam_2, const cv::KeyPoint& kp_1,
+                         const cv::KeyPoint& kp_2, const Eigen::Matrix3f& R12_eig,
+                         const Eigen::Vector3f& t12_eig, const float sigma_lev,
                          const float unc);
 
-  bool matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2,
-                           GeometricCamera* pOther, Sophus::SE3f& Tcw1,
-                           Sophus::SE3f& Tcw2, const float sigmaLevel1,
-                           const float sigmaLevel2,
-                           Eigen::Vector3f& x3Dtriangulated) {
+  bool MatchAndTriangulate(const cv::KeyPoint& kp_1, const cv::KeyPoint& kp_2,
+                           GeometricCamera* cam_2, Sophus::SE3f& Tcw_1_so,
+                           Sophus::SE3f& Tcw_2_so, const float sigma_lev_1,
+                           const float sigma_lev_2,
+                           Eigen::Vector3f& p3d_eig) {
     return false;
   }
 
@@ -103,7 +103,7 @@ class Pinhole : public GeometricCamera {
  private:
   // Parameters vector corresponds to
   //       [fx, fy, cx, cy]
-  TwoViewReconstruction* tvr;
+  TwoViewReconstruction* tvr_;
 };
 }  // namespace ORB_SLAM_FUSION
 

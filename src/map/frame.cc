@@ -137,8 +137,8 @@ Frame::Frame(const Frame &frame)
 }
 
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, ORBextractor *extractorLeft,
-             ORBextractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
+             const double &timeStamp, OrbExtractor *extractorLeft,
+             OrbExtractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth,
              GeometricCamera *pCamera, Frame *pPrevF,
              const IMU::Calib &ImuCalib)
@@ -236,14 +236,14 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 }
 
 Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
-             const double &timeStamp, ORBextractor *extractor,
+             const double &timeStamp, OrbExtractor *extractor,
              ORBVocabulary *voc, cv::Mat &K, cv::Mat &distCoef, const float &bf,
              const float &thDepth, GeometricCamera *pCamera, Frame *pPrevF,
              const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
       orb_extractor_left_(extractor),
-      orb_extractor_right_(static_cast<ORBextractor *>(NULL)),
+      orb_extractor_right_(static_cast<OrbExtractor *>(NULL)),
       timestamp_(timeStamp),
       cv_K_(K.clone()),
       eig_K_(Converter::toMatrix3f(K)),
@@ -334,16 +334,16 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth,
 }
 
 Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
-             ORBextractor *extractor, ORBVocabulary *voc,
+             OrbExtractor *extractor, ORBVocabulary *voc,
              GeometricCamera *pCamera, cv::Mat &distCoef, const float &bf,
              const float &thDepth, Frame *pPrevF, const IMU::Calib &ImuCalib)
     : mpcpi(NULL),
       mpORBvocabulary(voc),
       orb_extractor_left_(extractor),
-      orb_extractor_right_(static_cast<ORBextractor *>(NULL)),
+      orb_extractor_right_(static_cast<OrbExtractor *>(NULL)),
       timestamp_(timeStamp),
-      cv_K_(static_cast<Pinhole *>(pCamera)->toK()),
-      eig_K_(static_cast<Pinhole *>(pCamera)->toK_()),
+      cv_K_(static_cast<Pinhole *>(pCamera)->ToKCv()),
+      eig_K_(static_cast<Pinhole *>(pCamera)->ToKEig()),
       dist_coef_(distCoef.clone()),
       bf_(bf),
       th_depth_(thDepth),
@@ -401,10 +401,10 @@ Frame::Frame(const cv::Mat &imGray, const double &timeStamp,
     mfGridElementHeightInv = static_cast<float>(FRAME_GRID_ROWS) /
                              static_cast<float>(mnMaxY - mnMinY);
 
-    fx = static_cast<Pinhole *>(cam_)->toK().at<float>(0, 0);
-    fy = static_cast<Pinhole *>(cam_)->toK().at<float>(1, 1);
-    cx = static_cast<Pinhole *>(cam_)->toK().at<float>(0, 2);
-    cy = static_cast<Pinhole *>(cam_)->toK().at<float>(1, 2);
+    fx = static_cast<Pinhole *>(cam_)->ToKCv().at<float>(0, 0);
+    fy = static_cast<Pinhole *>(cam_)->ToKCv().at<float>(1, 1);
+    cx = static_cast<Pinhole *>(cam_)->ToKCv().at<float>(0, 2);
+    cy = static_cast<Pinhole *>(cam_)->ToKCv().at<float>(1, 2);
     invfx = 1.0f / fx;
     invfy = 1.0f / fy;
 
@@ -563,7 +563,7 @@ bool Frame::isInFrustum(MapPoint *pMP, float viewingCosLimit) {
     const float invz = 1.0f / PcZ;
     if (PcZ < 0.0f) return false;
 
-    const Eigen::Vector2f uv = cam_->project(Pc);
+    const Eigen::Vector2f uv = cam_->Project(Pc);
 
     if (uv(0) < mnMinX || uv(0) > mnMaxX) return false;
     if (uv(1) < mnMinY || uv(1) > mnMaxY) return false;
@@ -781,7 +781,7 @@ void Frame::UndistortKeyPoints() {
 
   // Undistort points
   mat = mat.reshape(2);
-  cv::undistortPoints(mat, mat, static_cast<Pinhole *>(cam_)->toK(),
+  cv::undistortPoints(mat, mat, static_cast<Pinhole *>(cam_)->ToKCv(),
                       dist_coef_, cv::Mat(), cv_K_);
   mat = mat.reshape(1);
 
@@ -808,7 +808,7 @@ void Frame::ComputeImageBounds(const cv::Mat &imLeft) {
     mat.at<float>(3, 1) = imLeft.rows;
 
     mat = mat.reshape(2);
-    cv::undistortPoints(mat, mat, static_cast<Pinhole *>(cam_)->toK(),
+    cv::undistortPoints(mat, mat, static_cast<Pinhole *>(cam_)->ToKCv(),
                         dist_coef_, cv::Mat(), cv_K_);
     mat = mat.reshape(1);
 
@@ -831,7 +831,7 @@ void Frame::ComputeStereoMatches() {
 
   const int thOrbDist = (ORBmatcher::TH_HIGH + ORBmatcher::TH_LOW) / 2;
 
-  const int nRows = orb_extractor_left_->mvImagePyramid[0].rows;
+  const int nRows = orb_extractor_left_->img_pyramid_[0].rows;
 
   // Assign keypoints to row table
   vector<vector<size_t>> vRowIndices(nRows, vector<size_t>());
@@ -910,7 +910,7 @@ void Frame::ComputeStereoMatches() {
 
       // sliding window search
       const int w = 5;
-      cv::Mat IL = orb_extractor_left_->mvImagePyramid[kpL.octave]
+      cv::Mat IL = orb_extractor_left_->img_pyramid_[kpL.octave]
                        .rowRange(scaledvL - w, scaledvL + w + 1)
                        .colRange(scaleduL - w, scaleduL + w + 1);
 
@@ -923,12 +923,12 @@ void Frame::ComputeStereoMatches() {
       const float iniu = scaleduR0 + L - w;
       const float endu = scaleduR0 + L + w + 1;
       if (iniu < 0 ||
-          endu >= orb_extractor_right_->mvImagePyramid[kpL.octave].cols)
+          endu >= orb_extractor_right_->img_pyramid_[kpL.octave].cols)
         continue;
 
       for (int incR = -L; incR <= +L; incR++) {
         cv::Mat IR =
-            orb_extractor_right_->mvImagePyramid[kpL.octave]
+            orb_extractor_right_->img_pyramid_[kpL.octave]
                 .rowRange(scaledvL - w, scaledvL + w + 1)
                 .colRange(scaleduR0 + incR - w, scaleduR0 + incR + w + 1);
 
@@ -1030,8 +1030,8 @@ void Frame::setIntegrated() {
 }
 
 Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
-             const double &timeStamp, ORBextractor *extractorLeft,
-             ORBextractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
+             const double &timeStamp, OrbExtractor *extractorLeft,
+             OrbExtractor *extractorRight, ORBVocabulary *voc, cv::Mat &K,
              cv::Mat &distCoef, const float &bf, const float &thDepth,
              GeometricCamera *pCamera, GeometricCamera *pCamera2,
              Sophus::SE3f &Tlr, Frame *pPrevF, const IMU::Calib &ImuCalib)
@@ -1074,12 +1074,12 @@ Frame::Frame(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   // ORB extraction
   thread threadLeft(&Frame::ExtractORB, this, 0, imLeft,
-                    static_cast<KannalaBrandt8 *>(cam_)->mvLappingArea[0],
-                    static_cast<KannalaBrandt8 *>(cam_)->mvLappingArea[1]);
+                    static_cast<KannalaBrandt8 *>(cam_)->lapping_areas_[0],
+                    static_cast<KannalaBrandt8 *>(cam_)->lapping_areas_[1]);
   thread threadRight(
       &Frame::ExtractORB, this, 1, imRight,
-      static_cast<KannalaBrandt8 *>(cam2_)->mvLappingArea[0],
-      static_cast<KannalaBrandt8 *>(cam2_)->mvLappingArea[1]);
+      static_cast<KannalaBrandt8 *>(cam2_)->lapping_areas_[0],
+      static_cast<KannalaBrandt8 *>(cam2_)->lapping_areas_[1]);
   threadLeft.join();
   threadRight.join();
 
@@ -1215,9 +1215,9 @@ bool Frame::isInFrustumChecks(MapPoint *pMP, float viewingCosLimit,
   // Project in image and check it is not outside
   Eigen::Vector2f uv;
   if (bRight)
-    uv = cam2_->project(Pc);
+    uv = cam2_->Project(Pc);
   else
-    uv = cam_->project(Pc);
+    uv = cam_->Project(Pc);
 
   if (uv(0) < mnMinX || uv(0) > mnMaxX) return false;
   if (uv(1) < mnMinY || uv(1) > mnMaxY) return false;
