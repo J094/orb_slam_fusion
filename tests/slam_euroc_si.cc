@@ -128,8 +128,8 @@ int main(int argc, char **argv) {
 
   // Create SLAM system. It initializes all system threads and gets ready to
   // process frames.
-  ORB_SLAM_FUSION::System SLAM(argv[1], argv[2], ORB_SLAM_FUSION::System::kImuStereo,
-                         true);
+  ORB_SLAM_FUSION::System SLAM(argv[1], argv[2],
+                               ORB_SLAM_FUSION::System::kImuStereo, true);
 
   cv::Mat imLeft, imRight;
   vector<ORB_SLAM_FUSION::IMU::Point> vImuMeas;

@@ -53,9 +53,9 @@ class OrbExtractor {
   // Compute the ORB features and descriptors on an image.
   // ORB are dispersed on the image using an octree.
   // Mask is ignored in the current implementation.
-  int operator()(cv::InputArray _image, cv::InputArray _mask,
-                 std::vector<cv::KeyPoint> &_keypoints,
-                 cv::OutputArray _descriptors, std::vector<int> &vLappingArea);
+  int operator()(cv::InputArray img, cv::InputArray msk,
+                 std::vector<cv::KeyPoint> &kps,
+                 cv::OutputArray descs, std::vector<int> &lapping_areas);
 
   int inline GetLevels() { return num_levs_; }
 
@@ -75,17 +75,16 @@ class OrbExtractor {
 
   std::vector<cv::Mat> img_pyramid_;
 
+  void ComputePyramid(cv::Mat img);
  protected:
-  void ComputePyramid(cv::Mat image);
   void ComputeKeyPointsOctTree(
-      std::vector<std::vector<cv::KeyPoint> > &allKeypoints);
+      std::vector<std::vector<cv::KeyPoint> > &all_kps);
   std::vector<cv::KeyPoint> DistributeOctTree(
-      const std::vector<cv::KeyPoint> &vToDistributeKeys, const int &minX,
-      const int &maxX, const int &minY, const int &maxY, const int &nFeatures,
-      const int &level);
+      const std::vector<cv::KeyPoint> &kps, const int &min_x, const int &max_x,
+      const int &min_y, const int &max_y, const int &num_feats, const int &lev);
 
   void ComputeKeyPointsOld(
-      std::vector<std::vector<cv::KeyPoint> > &allKeypoints);
+      std::vector<std::vector<cv::KeyPoint> > &all_kps);
   std::vector<cv::Point> patterns_;
 
   int num_feats_;
