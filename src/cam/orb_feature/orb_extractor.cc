@@ -100,19 +100,19 @@ static float IC_Angle(const Mat& img, Point2f pt, const vector<int>& u_max) {
 }
 
 const float factorPI = (float)(CV_PI / 180.f);
-static void computeOrbDescriptor(const KeyPoint& kpt, const Mat& img,
-                                 const Point* patterns_, uchar* desc) {
-  float angle = (float)kpt.angle * factorPI;
+static void ComputeOrbDescriptor(const KeyPoint& kp, const Mat& img,
+                                 const Point* patterns, uchar* desc) {
+  float angle = (float)kp.angle * factorPI;
   float a = (float)cos(angle), b = (float)sin(angle);
 
-  const uchar* center = &img.at<uchar>(cvRound(kpt.pt.y), cvRound(kpt.pt.x));
+  const uchar* center = &img.at<uchar>(cvRound(kp.pt.y), cvRound(kp.pt.x));
   const int step = (int)img.step;
 
 #define GET_VALUE(idx)                                             \
-  center[cvRound(patterns_[idx].x * b + patterns_[idx].y * a) * step + \
-         cvRound(patterns_[idx].x * a - patterns_[idx].y * b)]
+  center[cvRound(patterns[idx].x * b + patterns[idx].y * a) * step + \
+         cvRound(patterns[idx].x * a - patterns[idx].y * b)]
 
-  for (int i = 0; i < 32; ++i, patterns_ += 16) {
+  for (int i = 0; i < 32; ++i, patterns += 16) {
     int t0, t1, val;
     t0 = GET_VALUE(0);
     t1 = GET_VALUE(1);
@@ -524,7 +524,7 @@ void ExtractorNode::DivideNode(ExtractorNode& n_1, ExtractorNode& n_2,
 }
 
 //NOTE: stable_sort need const arguments
-static bool compareNodes(const pair<int, ExtractorNode*>& e1,
+static bool CompareNodes(const pair<int, ExtractorNode*>& e1,
                          const pair<int, ExtractorNode*>& e2) {
   if (e1.first < e2.first) {
     return true;
@@ -663,16 +663,16 @@ vector<cv::KeyPoint> OrbExtractor::DistributeOctTree(
       while (!is_finished) {
         size_prev = nds.size();
 
-        vector<pair<int, ExtractorNode*> > vPrevSizeAndPointerToNode =
+        vector<pair<int, ExtractorNode*> > prev_size_and_pointer_to_node =
             kps_size_and_nd;
         kps_size_and_nd.clear();
 
         // TODO: Check, if this change is good?
-        stable_sort(vPrevSizeAndPointerToNode.begin(),
-                    vPrevSizeAndPointerToNode.end(), compareNodes);
-        for (int j = vPrevSizeAndPointerToNode.size() - 1; j >= 0; j--) {
+        stable_sort(prev_size_and_pointer_to_node.begin(),
+                    prev_size_and_pointer_to_node.end(), CompareNodes);
+        for (int j = prev_size_and_pointer_to_node.size() - 1; j >= 0; j--) {
           ExtractorNode n_1, n_2, n_3, n_4;
-          vPrevSizeAndPointerToNode[j].second->DivideNode(n_1, n_2, n_3, n_4);
+          prev_size_and_pointer_to_node[j].second->DivideNode(n_1, n_2, n_3, n_4);
 
           // Add childs if they contain points
           if (n_1.kps_.size() > 0) {
@@ -708,7 +708,7 @@ vector<cv::KeyPoint> OrbExtractor::DistributeOctTree(
             }
           }
 
-          nds.erase(vPrevSizeAndPointerToNode[j].second->lit_);
+          nds.erase(prev_size_and_pointer_to_node[j].second->lit_);
 
           if ((int)nds.size() >= num_feats) break;
         }
@@ -999,13 +999,13 @@ void OrbExtractor::ComputeKeyPointsOld(
     computeOrientation(img_pyramid_[lev], all_kps[lev], umax_);
 }
 
-static void computeDescriptors(const Mat& img, vector<KeyPoint>& kps,
-                               Mat& descriptors, const vector<Point>& patterns_) {
-  descriptors = Mat::zeros((int)kps.size(), 32, CV_8UC1);
+static void ComputeDescriptors(const Mat& img, vector<KeyPoint>& kps,
+                               Mat& descs, const vector<Point>& patterns) {
+  descs = Mat::zeros((int)kps.size(), 32, CV_8UC1);
 
   for (size_t i = 0; i < kps.size(); i++)
-    computeOrbDescriptor(kps[i], img, &patterns_[0],
-                         descriptors.ptr((int)i));
+    ComputeOrbDescriptor(kps[i], img, &patterns[0],
+                         descs.ptr((int)i));
 }
 
 int OrbExtractor::operator()(InputArray img, InputArray msk,
@@ -1057,7 +1057,7 @@ int OrbExtractor::operator()(InputArray img, InputArray msk,
     // Compute the descriptors
     // Mat desc = descriptors.rowRange(offset, offset + nkeypointsLevel);
     Mat desc = cv::Mat(nkeypointsLevel, 32, CV_8U);
-    computeDescriptors(workingMat, kps_tmp, desc, patterns_);
+    ComputeDescriptors(workingMat, kps_tmp, desc, patterns_);
 
     offset += nkeypointsLevel;
 
