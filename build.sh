@@ -15,7 +15,7 @@ function build_orb_slam_fusion() {
   mkdir build_${build_mode}
   cd build_${build_mode}
   cmake .. -DCMAKE_BUILD_TYPE=${build_mode}
-  make -j${nproc}
+  make -j4
   echo "Done!"
 
   echo "Configuring and building 3rdparty/g2o..."
@@ -23,7 +23,7 @@ function build_orb_slam_fusion() {
   mkdir build_${build_mode}
   cd build_${build_mode}
   cmake .. -DCMAKE_BUILD_TYPE=${build_mode}
-  make -j${nproc}
+  make -j4
   echo "Done!"
 
   echo "Copying 3rdparty libs to lib directory..."
@@ -41,7 +41,7 @@ function build_orb_slam_fusion() {
   #TODO: Add aarch64 build command.
     cmake .. -DCMAKE_BUILD_TYPE=${build_mode}
   fi
-  make -j${nproc}
+  make -j4
   echo "Done!"
 }
 

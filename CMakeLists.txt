@@ -35,10 +35,10 @@ endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-find_package(OpenCV 4 QUIET)
-   if(NOT OpenCV_FOUND)
-      message(FATAL_ERROR "OpenCV > 4 not found.")
-   endif()
+find_package(OpenCV 3.2 QUIET)
+  #  if(NOT OpenCV_FOUND)
+  #     message(FATAL_ERROR "OpenCV > 4 not found.")
+  #  endif()
 
 message("OPENCV VERSION:")
 message(${OpenCV_VERSION})
@@ -54,7 +54,7 @@ ${PROJECT_SOURCE_DIR}/include/CameraModels
 ${PROJECT_SOURCE_DIR}/3rdparty/Sophus
 ${EIGEN3_INCLUDE_DIR}
 ${Pangolin_INCLUDE_DIRS}
-${PROJECT_SOURCE_DIR}/../breakpad/src
+/home/joey/gj/repos/breakpad/src
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/${BUILD_TYPE})

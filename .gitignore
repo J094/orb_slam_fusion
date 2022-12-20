@@ -1,1 +1,12 @@
+# Vscode files
 .vscode/*
+
+# Build folders and files
+bin/
+build_debug/
+build_release/
+*.so
+
+# Vocabulary files
+vocabulary/ORBvoc.txt
+vocabulary/ORBvoc.bin
